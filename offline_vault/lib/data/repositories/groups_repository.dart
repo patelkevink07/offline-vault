@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:uuid/uuid.dart';
 
 import '../local/database.dart';
 import '../remote/groups_remote_source.dart';
@@ -29,44 +30,87 @@ class GroupsRepository {
   /// Watch local groups from Drift DB (Local-first)
   Stream<List<LocalGroup>> watchGroups() => _db.groupsDao.watchAll();
 
-  /// Create a new group via RPC and cache locally
+  /// Create a new group via RPC and cache locally, or create locally if offline.
   Future<Map<String, dynamic>> createGroup({
     required String name,
     required String color,
   }) async {
-    final result = await _remote.createGroup(name: name, color: color);
-    final groupData = result['group'] as Map<String, dynamic>;
-    final groupId = groupData['id'] as String;
+    try {
+      final result = await _remote.createGroup(name: name, color: color);
+      final groupData = result['group'] as Map<String, dynamic>;
+      final groupId = groupData['id'] as String;
 
-    await _db.groupsDao.upsert(
-      LocalGroupsCompanion.insert(
-        id: groupId,
-        name: name,
-        color: Value(color),
-        myRole: const Value('owner'),
-      ),
-    );
+      await _db.groupsDao.upsert(
+        LocalGroupsCompanion.insert(
+          id: groupId,
+          name: name,
+          color: Value(color),
+          myRole: const Value('owner'),
+        ),
+      );
 
-    return result;
+      return result;
+    } catch (_) {
+      // Offline fallback: create local vault in Drift database
+      final localId = const Uuid().v4();
+      await _db.groupsDao.upsert(
+        LocalGroupsCompanion.insert(
+          id: localId,
+          name: name,
+          color: Value(color),
+          myRole: const Value('owner'),
+        ),
+      );
+      return {
+        'group': {
+          'id': localId,
+          'name': name,
+          'color': color,
+          'myRole': 'owner',
+        }
+      };
+    }
   }
 
-  /// Join a group with code via RPC and cache locally
+  /// Join a group with code via RPC and cache locally, or create locally if offline.
   Future<Map<String, dynamic>> joinGroup(String code) async {
-    final result = await _remote.joinGroup(code);
-    final groupData = result['group'] as Map<String, dynamic>;
-    final groupId = groupData['id'] as String;
-    final groupName = groupData['name'] as String;
-    final groupColor = groupData['color'] as String;
+    try {
+      final result = await _remote.joinGroup(code);
+      final groupData = result['group'] as Map<String, dynamic>;
+      final groupId = groupData['id'] as String;
+      final groupName = groupData['name'] as String;
+      final groupColor = groupData['color'] as String;
 
-    await _db.groupsDao.upsert(
-      LocalGroupsCompanion.insert(
-        id: groupId,
-        name: groupName,
-        color: Value(groupColor),
-        myRole: const Value('viewer'),
-      ),
-    );
+      await _db.groupsDao.upsert(
+        LocalGroupsCompanion.insert(
+          id: groupId,
+          name: groupName,
+          color: Value(groupColor),
+          myRole: const Value('viewer'),
+        ),
+      );
 
-    return result;
+      return result;
+    } catch (_) {
+      // Offline fallback: create local joined group stub
+      final localId = const Uuid().v4();
+      final groupName = 'Vault #$code';
+      await _db.groupsDao.upsert(
+        LocalGroupsCompanion.insert(
+          id: localId,
+          name: groupName,
+          color: const Value('#0F5C5A'),
+          myRole: const Value('viewer'),
+        ),
+      );
+      return {
+        'group': {
+          'id': localId,
+          'name': groupName,
+          'color': '#0F5C5A',
+          'myRole': 'viewer',
+        }
+      };
+    }
   }
 }

@@ -32,18 +32,20 @@ class FoldersRepository {
     required String name,
   }) async {
     final folderId = const Uuid().v4();
+    DateTime updatedAt = DateTime.now();
 
-    // 1. Create on Supabase
-    final response = await _supabase.from('folders').insert({
-      'id': folderId,
-      'group_id': groupId,
-      'parent_id': parentId,
-      'name': name,
-    }).select().single();
+    try {
+      final response = await _supabase.from('folders').insert({
+        'id': folderId,
+        'group_id': groupId,
+        'parent_id': parentId,
+        'name': name,
+      }).select().single();
+      updatedAt = DateTime.parse(response['updated_at'] as String);
+    } catch (_) {
+      // Offline fallback: save locally
+    }
 
-    final updatedAt = DateTime.parse(response['updated_at'] as String);
-
-    // 2. Cache locally in Drift
     await _db.foldersDao.upsert(
       LocalFoldersCompanion.insert(
         id: folderId,
@@ -56,8 +58,14 @@ class FoldersRepository {
   }
 
   Future<void> deleteFolder(String folderId) async {
-    // Soft delete on Supabase
-    await _supabase
+    try {
+      await _supabase
+          .from('folders')
+          .update({'is_deleted': true, 'updated_at': DateTime.now().toIso8601String()})
+          .eq('id', folderId);
+    } catch (_) {}
+    await _db.foldersDao.deleteById(folderId);
+  }
         .from('folders')
         .update({'deleted': true})
         .eq('id', folderId);

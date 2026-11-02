@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../core/utils/logger.dart';
@@ -25,10 +26,20 @@ class AuthRepository {
       : _remoteSource = remoteSource;
 
   final AuthRemoteSource _remoteSource;
+  bool _isGuest = false;
+
+  bool get isGuest => _isGuest;
+  void setGuest(bool val) => _isGuest = val;
 
   User? get currentUser => _remoteSource.currentUser;
-  bool get isAuthenticated => currentUser != null;
+  bool get isAuthenticated => _isGuest || currentUser != null;
   Stream<AuthState> get onAuthStateChange => _remoteSource.onAuthStateChange;
+
+  Future<void> signInAsGuest() async {
+    _isGuest = true;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('offline_guest_mode', true);
+  }
 
   Future<void> sendEmailOtp(String email) => _remoteSource.sendEmailOtp(email);
 
@@ -41,6 +52,11 @@ class AuthRepository {
   Future<AuthResponse> signInWithGoogle() => _remoteSource.signInWithGoogle();
 
   Future<void> signOut() async {
+    _isGuest = false;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('offline_guest_mode');
+    } catch (_) {}
     try {
       await _remoteSource.signOut();
     } catch (e, st) {

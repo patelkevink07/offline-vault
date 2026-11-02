@@ -28,17 +28,48 @@ class UploadScreen extends ConsumerStatefulWidget {
   ConsumerState<UploadScreen> createState() => _UploadScreenState();
 }
 
+class _UploadFileItem {
+  _UploadFileItem({
+    required this.file,
+    required this.nameController,
+    required this.isPdf,
+  });
+
+  final File file;
+  final TextEditingController nameController;
+  final bool isPdf;
+}
+
 class _UploadScreenState extends ConsumerState<UploadScreen> {
-  final List<File> _selectedFiles = [];
+  final List<_UploadFileItem> _selectedItems = [];
   CompressionQuality _selectedQuality = CompressionQuality.high;
   bool _isUploading = false;
+
+  @override
+  void dispose() {
+    for (final item in _selectedItems) {
+      item.nameController.dispose();
+    }
+    super.dispose();
+  }
 
   Future<void> _pickImages() async {
     final picker = ImagePicker();
     final picked = await picker.pickMultiImage();
     if (picked.isNotEmpty) {
       setState(() {
-        _selectedFiles.addAll(picked.map((x) => File(x.path)));
+        for (final x in picked) {
+          final defaultName = x.name.isNotEmpty
+              ? x.name
+              : x.path.split(Platform.pathSeparator).last;
+          _selectedItems.add(
+            _UploadFileItem(
+              file: File(x.path),
+              nameController: TextEditingController(text: defaultName),
+              isPdf: false,
+            ),
+          );
+        }
       });
     }
   }
@@ -49,17 +80,25 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
       allowedExtensions: ['pdf'],
       allowMultiple: true,
     );
-    if (result != null && result.paths.isNotEmpty) {
+    if (result != null && result.files.isNotEmpty) {
       setState(() {
-        _selectedFiles.addAll(
-          result.paths.whereType<String>().map((p) => File(p)),
-        );
+        for (final f in result.files) {
+          if (f.path != null) {
+            _selectedItems.add(
+              _UploadFileItem(
+                file: File(f.path!),
+                nameController: TextEditingController(text: f.name),
+                isPdf: true,
+              ),
+            );
+          }
+        }
       });
     }
   }
 
   Future<void> _startUpload() async {
-    if (_selectedFiles.isEmpty) return;
+    if (_selectedItems.isEmpty) return;
 
     setState(() => _isUploading = true);
 
@@ -68,24 +107,28 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
     final crypto = CryptoService(keyManager: keyManager);
     final storage = FileStorageService(cryptoService: crypto);
 
-    for (final file in _selectedFiles) {
-      final name = file.path.split(Platform.pathSeparator).last;
-      final mime = lookupMimeType(file.path) ?? 'application/octet-stream';
+    for (final item in _selectedItems) {
+      String customName = item.nameController.text.trim();
+      if (customName.isEmpty) {
+        customName = item.file.path.split(Platform.pathSeparator).last;
+      }
+      final mime = lookupMimeType(item.file.path) ??
+          (item.isPdf ? 'application/pdf' : 'application/octet-stream');
 
       final queueId = await queueRepo.enqueueFile(
-        localPath: file.path,
+        localPath: item.file.path,
         groupId: widget.groupId,
         folderId: widget.folderId,
-        name: name,
+        name: customName,
         mime: mime,
       );
 
       // Process upload immediately
-      final item = (await queueRepo.watchQueue(widget.groupId).first)
-          .firstWhere((q) => q.id == queueId);
+      final queueItems = await queueRepo.watchQueue(widget.groupId).first;
+      final queueItem = queueItems.firstWhere((q) => q.id == queueId);
 
       await queueRepo.processQueueItem(
-        item: item,
+        item: queueItem,
         storageService: storage,
         quality: _selectedQuality,
       );
@@ -103,7 +146,7 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add Files'),
+        title: const Text('Add Files & Documents'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(AppSpacing.lg),
@@ -131,7 +174,7 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
                   child: OutlinedButton.icon(
                     onPressed: _isUploading ? null : _pickPdfs,
                     icon: const Icon(Icons.picture_as_pdf_outlined),
-                    label: const Text('Add PDF'),
+                    label: const Text('Add Document'),
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
                       shape: RoundedRectangleBorder(
@@ -176,49 +219,121 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
             ),
             const SizedBox(height: AppSpacing.lg),
 
-            // Selected files list
+            // Selected files list with document naming fields
             Expanded(
-              child: _selectedFiles.isEmpty
+              child: _selectedItems.isEmpty
                   ? Center(
-                      child: Text(
-                        'No files selected yet.',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                        ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.cloud_upload_outlined,
+                            size: 48,
+                            color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
+                          ),
+                          const SizedBox(height: AppSpacing.sm),
+                          Text(
+                            'No documents selected yet.',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                            ),
+                          ),
+                          const SizedBox(height: AppSpacing.xs),
+                          Text(
+                            'Tap "Add Images" or "Add Document" above.',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
+                            ),
+                          ),
+                        ],
                       ),
                     )
                   : ListView.separated(
-                      itemCount: _selectedFiles.length,
-                      separatorBuilder: (_, __) => const Divider(height: 1),
+                      itemCount: _selectedItems.length,
+                      separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
                       itemBuilder: (context, index) {
-                        final file = _selectedFiles[index];
-                        final name = file.path.split(Platform.pathSeparator).last;
-                        final isPdf = name.toLowerCase().endsWith('.pdf');
+                        final item = _selectedItems[index];
+                        int fileSizeBytes = 0;
+                        try {
+                          fileSizeBytes = item.file.lengthSync();
+                        } catch (_) {}
+                        final sizeKb = (fileSizeBytes / 1024).toStringAsFixed(1);
 
-                        return ListTile(
-                          leading: Icon(
-                            isPdf ? Icons.picture_as_pdf : Icons.image,
-                            color: isPdf ? AppColors.lightError : AppColors.lightPrimary,
+                        return Card(
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            side: const BorderSide(color: AppColors.lightOutline, width: 0.8),
                           ),
-                          title: Text(
-                            name,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          trailing: IconButton(
-                            icon: const Icon(Icons.close_rounded),
-                            onPressed: _isUploading
-                                ? null
-                                : () => setState(() => _selectedFiles.removeAt(index)),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: AppSpacing.md,
+                              vertical: AppSpacing.sm,
+                            ),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Container(
+                                  width: 44,
+                                  height: 44,
+                                  decoration: BoxDecoration(
+                                    color: item.isPdf
+                                        ? AppColors.lightError.withValues(alpha: 0.1)
+                                        : theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Icon(
+                                    item.isPdf ? Icons.picture_as_pdf : Icons.image,
+                                    color: item.isPdf ? AppColors.lightError : theme.colorScheme.primary,
+                                  ),
+                                ),
+                                const SizedBox(width: AppSpacing.md),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      TextFormField(
+                                        controller: item.nameController,
+                                        enabled: !_isUploading,
+                                        decoration: const InputDecoration(
+                                          labelText: 'Document Name',
+                                          isDense: true,
+                                          border: UnderlineInputBorder(),
+                                          contentPadding: EdgeInsets.symmetric(vertical: 4),
+                                        ),
+                                      ),
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        '$sizeKb KB • ${item.isPdf ? "PDF Document" : "Image"}',
+                                        style: theme.textTheme.labelSmall?.copyWith(
+                                          color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.close_rounded),
+                                  tooltip: 'Remove',
+                                  onPressed: _isUploading
+                                      ? null
+                                      : () => setState(() {
+                                          item.nameController.dispose();
+                                          _selectedItems.removeAt(index);
+                                        }),
+                                ),
+                              ],
+                            ),
                           ),
                         );
                       },
                     ),
             ),
+            const SizedBox(height: AppSpacing.md),
 
             // Upload button
             FilledButton(
-              onPressed: (_selectedFiles.isEmpty || _isUploading)
+              onPressed: (_selectedItems.isEmpty || _isUploading)
                   ? null
                   : _startUpload,
               style: FilledButton.styleFrom(
@@ -236,7 +351,7 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
                         color: Colors.white,
                       ),
                     )
-                  : Text('Upload ${_selectedFiles.length} files'),
+                  : Text('Upload ${_selectedItems.length} File${_selectedItems.length == 1 ? "" : "s"}'),
             ),
           ],
         ),

@@ -53,6 +53,28 @@ class AuthController extends StateNotifier<AuthStateData> {
       state = const AuthAuthenticated();
     } catch (e, st) {
       VaultLogger.e('Google sign-in failed', e, st);
+      final errorStr = e.toString();
+      if (errorStr.contains('10') || errorStr.contains('DEVELOPER_ERROR')) {
+        state = const AuthError(
+          message:
+              'Google Sign-In is not configured for this APK build (missing SHA-1 in Google Cloud Console). Tap "Offline Vault Mode" below to proceed.',
+        );
+      } else if (errorStr.contains('cancelled by user') ||
+          errorStr.contains('sign-in was cancelled')) {
+        state = const AuthInitial();
+      } else {
+        state = AuthError(message: 'Sign-in failed: $e');
+      }
+    }
+  }
+
+  Future<void> continueAsGuest() async {
+    state = const AuthLoading();
+    try {
+      await _repository.signInAsGuest();
+      state = const AuthAuthenticated();
+    } catch (e, st) {
+      VaultLogger.e('Guest sign-in failed', e, st);
       state = AuthError(message: e.toString());
     }
   }

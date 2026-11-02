@@ -14,6 +14,11 @@ class EnvConfig {
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6InN1cGFiYXNlIiwiaWF0IjoxNjAwMDAwMDAwLCJleHAiOjIwMDAwMDAwMDB9.c2lnbmF0dXJlX2Zvcl9kZXZlbG9wbWVudF90ZXN0aW5nX29ubHk',
   );
 
+  static const String googleWebClientId = String.fromEnvironment(
+    'GOOGLE_WEB_CLIENT_ID',
+    defaultValue: '',
+  );
+
   static bool get isConfigured =>
       supabaseUrl.isNotEmpty &&
       supabaseAnonKey.isNotEmpty &&

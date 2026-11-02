@@ -1,6 +1,7 @@
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../core/utils/env_config.dart';
 import '../../core/utils/logger.dart';
 
 /// Remote authentication data source using Supabase Auth.
@@ -9,9 +10,29 @@ class AuthRemoteSource {
 
   final SupabaseClient _supabase;
 
-  User? get currentUser => _supabase.auth.currentUser;
-  Session? get currentSession => _supabase.auth.currentSession;
-  Stream<AuthState> get onAuthStateChange => _supabase.auth.onAuthStateChange;
+  User? get currentUser {
+    try {
+      return _supabase.auth.currentUser;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Session? get currentSession {
+    try {
+      return _supabase.auth.currentSession;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Stream<AuthState> get onAuthStateChange {
+    try {
+      return _supabase.auth.onAuthStateChange;
+    } catch (_) {
+      return const Stream.empty();
+    }
+  }
 
   /// Send 6-digit OTP code to email.
   Future<void> sendEmailOtp(String email) async {
@@ -39,6 +60,9 @@ class AuthRemoteSource {
   Future<AuthResponse> signInWithGoogle() async {
     VaultLogger.i('Initiating Google Sign-In...');
     final googleSignIn = GoogleSignIn(
+      serverClientId: EnvConfig.googleWebClientId.isNotEmpty
+          ? EnvConfig.googleWebClientId
+          : null,
       scopes: ['email', 'profile'],
     );
     final googleUser = await googleSignIn.signIn();

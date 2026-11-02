@@ -40,6 +40,14 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
           SnackBar(
             content: Text(next.message),
             backgroundColor: theme.colorScheme.error,
+            duration: const Duration(seconds: 8),
+            action: SnackBarAction(
+              label: 'Offline Mode',
+              textColor: Colors.white,
+              onPressed: () {
+                ref.read(authControllerProvider.notifier).continueAsGuest();
+              },
+            ),
           ),
         );
       }
@@ -252,6 +260,41 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                       child: Text(l10n.cancel),
                     ),
                   ],
+
+                  // Offline / Guest Mode Section
+                  const SizedBox(height: AppSpacing.xxl),
+                  Row(
+                    children: [
+                      const Expanded(child: Divider()),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                        child: Text(
+                          'OR',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      const Expanded(child: Divider()),
+                    ],
+                  ),
+                  const SizedBox(height: AppSpacing.xl),
+                  FilledButton.tonalIcon(
+                    onPressed: isLoading
+                        ? null
+                        : () => ref
+                            .read(authControllerProvider.notifier)
+                            .continueAsGuest(),
+                    icon: const Icon(Icons.shield_outlined),
+                    label: const Text('Continue in Offline Vault Mode'),
+                    style: FilledButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),

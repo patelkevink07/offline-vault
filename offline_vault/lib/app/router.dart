@@ -30,6 +30,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         return isOnboarding ? null : '/onboarding';
       }
 
+      final isOfflineGuest = prefs.getBool('offline_guest_mode') ?? false;
+      if (isOfflineGuest) {
+        authRepo.setGuest(true);
+      }
+
       final isAuthenticated = authRepo.isAuthenticated;
 
       if (!isAuthenticated && !isLoggingIn) {

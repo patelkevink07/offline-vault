@@ -11,6 +11,7 @@ google-services.json
 
 # Keystore
 *.keystore
+!android/app/debug.keystore
 *.jks
 key.properties
 

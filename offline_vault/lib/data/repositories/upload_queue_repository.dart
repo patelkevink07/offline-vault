@@ -104,53 +104,61 @@ class UploadQueueRepository {
         return true;
       }
 
-      // 3. Upload thumbnail if image
-      String? thumbStoragePath;
+      // 3. Store encrypted files locally first (Offline-first guarantee)
+      String? localThumbPath;
       if (thumbBytes != null) {
-        thumbStoragePath = '${item.groupId}/thumbs/$fileId.webp';
-        await _supabase.storage.from('vault').uploadBinary(
-              thumbStoragePath,
-              thumbBytes,
-              fileOptions: const FileOptions(upsert: true, contentType: 'image/webp'),
-            );
-
-        // Store encrypted locally
-        final localThumbPath = '${await storageService.getThumbsPath(item.groupId)}/$fileId.webp';
+        localThumbPath = '${await storageService.getThumbsPath(item.groupId)}/$fileId.webp';
         await storageService.writeEncryptedFile(
           filePath: localThumbPath,
           plainBytes: thumbBytes,
         );
       }
 
-      // 4. Upload original file
-      final originalStoragePath = '${item.groupId}/originals/$fileId';
-      await _supabase.storage.from('vault').uploadBinary(
-            originalStoragePath,
-            rawBytes,
-            fileOptions: FileOptions(upsert: true, contentType: item.mime),
-          );
-
-      // Store encrypted locally
       final localOriginalPath = '${await storageService.getOriginalsPath(item.groupId)}/$fileId';
       await storageService.writeEncryptedFile(
         filePath: localOriginalPath,
         plainBytes: rawBytes,
       );
 
-      // 5. Insert row into files table on Supabase
-      final insertedRow = await _supabase.from('files').insert({
-        'id': fileId,
-        'group_id': item.groupId,
-        'folder_id': item.folderId,
-        'name': item.name,
-        'mime_type': item.mime,
-        'size_bytes': rawBytes.length,
-        'checksum': checksum,
-        'storage_path': originalStoragePath,
-        'thumb_path': thumbStoragePath,
-      }).select().single();
+      // 4. Optionally upload to Supabase if connected
+      DateTime updatedAt = DateTime.now();
+      String? thumbStoragePath;
+      String? originalStoragePath;
+      try {
+        if (thumbBytes != null) {
+          thumbStoragePath = '${item.groupId}/thumbs/$fileId.webp';
+          await _supabase.storage.from('vault').uploadBinary(
+                thumbStoragePath,
+                thumbBytes,
+                fileOptions: const FileOptions(upsert: true, contentType: 'image/webp'),
+              );
+        }
 
-      // 6. Insert into Drift local files table
+        originalStoragePath = '${item.groupId}/originals/$fileId';
+        await _supabase.storage.from('vault').uploadBinary(
+              originalStoragePath,
+              rawBytes,
+              fileOptions: FileOptions(upsert: true, contentType: item.mime),
+            );
+
+        final insertedRow = await _supabase.from('files').insert({
+          'id': fileId,
+          'group_id': item.groupId,
+          'folder_id': item.folderId,
+          'name': item.name,
+          'mime_type': item.mime,
+          'size_bytes': rawBytes.length,
+          'checksum': checksum,
+          'storage_path': originalStoragePath,
+          'thumb_path': thumbStoragePath,
+        }).select().single();
+
+        updatedAt = DateTime.parse(insertedRow['updated_at'] as String);
+      } catch (cloudErr) {
+        VaultLogger.w('Cloud upload skipped or failed (offline/guest mode): $cloudErr');
+      }
+
+      // 5. Insert into Drift local files table
       await _db.filesDao.upsert(
         LocalFilesCompanion.insert(
           id: fileId,
@@ -162,9 +170,9 @@ class UploadQueueRepository {
           checksum: checksum,
           thumbState: const Value('ready'),
           originalState: const Value('ready'),
-          localThumbPath: Value(thumbBytes != null ? '${await storageService.getThumbsPath(item.groupId)}/$fileId.webp' : null),
+          localThumbPath: Value(localThumbPath),
           localOriginalPath: Value(localOriginalPath),
-          updatedAt: DateTime.parse(insertedRow['updated_at'] as String),
+          updatedAt: updatedAt,
         ),
       );
 

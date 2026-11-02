@@ -304,37 +304,51 @@ class FilesDao extends DatabaseAccessor<AppDatabase> with _$FilesDaoMixin {
 
   /// Full-text search across file names and notes using FTS5.
   Future<List<LocalFile>> search(String query) async {
-    if (query.trim().isEmpty) return [];
+    final trimmed = query.trim();
+    if (trimmed.isEmpty) return [];
 
-    final sanitized = query.replaceAll('"', '""');
-    final results = await customSelect(
-      'SELECT f.* FROM local_files f '
-      'INNER JOIN files_fts fts ON f.id = fts.rowid '
-      'WHERE files_fts MATCH ? '
-      'ORDER BY rank',
-      variables: [Variable.withString(sanitized)],
-      readsFrom: {localFiles},
-    ).get();
+    try {
+      final sanitized = trimmed.replaceAll('"', '""');
+      final results = await customSelect(
+        'SELECT f.* FROM local_files f '
+        'INNER JOIN files_fts fts ON f.rowid = fts.rowid '
+        'WHERE files_fts MATCH ? '
+        'ORDER BY rank',
+        variables: [Variable.withString(sanitized)],
+        readsFrom: {localFiles},
+      ).get();
 
-    return results.map((row) {
-      return LocalFile(
-        id: row.read<String>('id'),
-        groupId: row.read<String>('group_id'),
-        folderId: row.readNullable<String>('folder_id'),
-        name: row.read<String>('name'),
-        note: row.readNullable<String>('note'),
-        mime: row.read<String>('mime'),
-        size: row.read<int>('size'),
-        checksum: row.read<String>('checksum'),
-        width: row.readNullable<int>('width'),
-        height: row.readNullable<int>('height'),
-        thumbState: row.read<String>('thumb_state'),
-        originalState: row.read<String>('original_state'),
-        localThumbPath: row.readNullable<String>('local_thumb_path'),
-        localOriginalPath: row.readNullable<String>('local_original_path'),
-        updatedAt: row.read<DateTime>('updated_at'),
-      );
-    }).toList();
+      if (results.isNotEmpty) {
+        return results.map((row) {
+          return LocalFile(
+            id: row.read<String>('id'),
+            groupId: row.read<String>('group_id'),
+            folderId: row.readNullable<String>('folder_id'),
+            name: row.read<String>('name'),
+            note: row.readNullable<String>('note'),
+            mime: row.read<String>('mime'),
+            size: row.read<int>('size'),
+            checksum: row.read<String>('checksum'),
+            width: row.readNullable<int>('width'),
+            height: row.readNullable<int>('height'),
+            thumbState: row.read<String>('thumb_state'),
+            originalState: row.read<String>('original_state'),
+            localThumbPath: row.readNullable<String>('local_thumb_path'),
+            localOriginalPath: row.readNullable<String>('local_original_path'),
+            updatedAt: row.read<DateTime>('updated_at'),
+          );
+        }).toList();
+      }
+    } catch (_) {
+      // Fall back to SQL LIKE if FTS is unavailable
+    }
+
+    final pattern = '%${trimmed.toLowerCase()}%';
+    return (select(localFiles)
+          ..where((t) =>
+              t.name.lower().like(pattern) |
+              t.note.lower().like(pattern)))
+        .get();
   }
 }
 

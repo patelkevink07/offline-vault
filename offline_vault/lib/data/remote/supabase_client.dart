@@ -6,7 +6,19 @@ import '../../core/utils/logger.dart';
 
 /// Global Supabase client provider.
 final supabaseClientProvider = Provider<SupabaseClient>((ref) {
-  return Supabase.instance.client;
+  try {
+    return Supabase.instance.client;
+  } catch (_) {
+    // If Supabase.initialize() was not called or failed (e.g. offline or test environment)
+    return SupabaseClient(
+      EnvConfig.supabaseUrl,
+      EnvConfig.supabaseAnonKey,
+      authOptions: const AuthClientOptions(
+        authFlowType: AuthFlowType.pkce,
+        autoRefreshToken: false,
+      ),
+    );
+  }
 });
 
 class SupabaseService {
