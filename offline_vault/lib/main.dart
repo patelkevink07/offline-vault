@@ -15,14 +15,22 @@ void main() async {
   VaultLogger.i('Starting Offline Vault app...');
   EnvConfig.printConfigStatus();
 
-  // Initialize KeyManager and crypto
+  // Initialize KeyManager and crypto safely
   final keyManager = KeyManager();
   final cryptoService = CryptoService(keyManager: keyManager);
-  await cryptoService.init();
+  try {
+    await cryptoService.init();
+  } catch (e) {
+    VaultLogger.w('CryptoService init warning', e);
+  }
 
-  // Clean temp files left from past runs
-  final storageService = FileStorageService(cryptoService: cryptoService);
-  await storageService.cleanTempFiles();
+  // Clean temp files left from past runs safely
+  try {
+    final storageService = FileStorageService(cryptoService: cryptoService);
+    await storageService.cleanTempFiles();
+  } catch (e) {
+    VaultLogger.w('Storage clean temp warning', e);
+  }
 
   // Initialize Supabase client
   try {

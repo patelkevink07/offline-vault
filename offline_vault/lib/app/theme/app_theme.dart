@@ -204,7 +204,7 @@ abstract final class AppTheme {
       // ── Filled buttons ───────────────────────────────────────────────
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
-          minimumSize: const Size(double.infinity, AppSpacing.minTouchTarget),
+          minimumSize: const Size(64, AppSpacing.minTouchTarget),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppSpacing.buttonRadius),
           ),
@@ -219,7 +219,7 @@ abstract final class AppTheme {
       // ── Elevated buttons ─────────────────────────────────────────────
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          minimumSize: const Size(double.infinity, AppSpacing.minTouchTarget),
+          minimumSize: const Size(64, AppSpacing.minTouchTarget),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppSpacing.buttonRadius),
           ),
@@ -234,7 +234,7 @@ abstract final class AppTheme {
       // ── Outlined buttons ─────────────────────────────────────────────
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          minimumSize: const Size(double.infinity, AppSpacing.minTouchTarget),
+          minimumSize: const Size(64, AppSpacing.minTouchTarget),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppSpacing.buttonRadius),
           ),
