@@ -25,6 +25,17 @@ jobs:
           channel: 'stable'
           cache: true
 
+      - name: Setup Android NDK and Accept Licenses
+        run: |
+          SDK_ROOT="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-/usr/local/lib/android/sdk}}"
+          if [ -d "$SDK_ROOT/cmdline-tools/latest/bin" ]; then
+            yes | "$SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" --licenses || true
+            "$SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" --install "ndk;26.3.11579264" "cmake;3.22.1" || true
+          elif which sdkmanager > /dev/null 2>&1; then
+            yes | sdkmanager --licenses || true
+            sdkmanager --install "ndk;26.3.11579264" "cmake;3.22.1" || true
+          fi
+
       - name: Get Dependencies
         working-directory: offline_vault
         run: flutter pub get
@@ -39,16 +50,11 @@ jobs:
 
       - name: Build Android APK
         working-directory: offline_vault
-        run: |
-          set +e
-          flutter build apk --debug > build_output.log 2>&1
-          EXIT_CODE=$?
-          echo "=== GRADLE LOG TAIL ==="
-          tail -n 100 build_output.log
-          exit $EXIT_CODE
+        run: flutter build apk --debug
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: offline-vault-debug-apk
           path: offline_vault/build/app/outputs/flutter-apk/app-debug.apk
+          retention-days: 14
