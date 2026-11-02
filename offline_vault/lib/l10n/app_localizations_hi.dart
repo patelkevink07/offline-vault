@@ -9,7 +9,7 @@ class AppLocalizationsHi extends AppLocalizations {
   AppLocalizationsHi([String locale = 'hi']) : super(locale);
 
   @override
-  String get appName => 'ऑफ़लाइन वॉल्ट';
+  String get appName => 'vaultOFF';
 
   @override
   String get onboardingTitle1 => 'एक बार सिंक करें';
@@ -39,7 +39,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get onboardingGetStarted => 'शुरू करें';
 
   @override
-  String get signInTitle => 'ऑफ़लाइन वॉल्ट में आपका स्वागत है';
+  String get signInTitle => 'vaultOFF में आपका स्वागत है';
 
   @override
   String get signInSubtitle => 'अपनी वॉल्ट तक पहुँचने के लिए साइन इन करें';

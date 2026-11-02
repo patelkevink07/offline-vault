@@ -103,7 +103,7 @@ abstract class AppLocalizations {
   /// No description provided for @appName.
   ///
   /// In en, this message translates to:
-  /// **'Offline Vault'**
+  /// **'vaultOFF'**
   String get appName;
 
   /// No description provided for @onboardingTitle1.
@@ -157,7 +157,7 @@ abstract class AppLocalizations {
   /// No description provided for @signInTitle.
   ///
   /// In en, this message translates to:
-  /// **'Welcome to Offline Vault'**
+  /// **'Welcome to vaultOFF'**
   String get signInTitle;
 
   /// No description provided for @signInSubtitle.

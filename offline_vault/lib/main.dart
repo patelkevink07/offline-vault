@@ -12,7 +12,7 @@ import 'data/remote/supabase_client.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  VaultLogger.i('Starting Offline Vault app...');
+  VaultLogger.i('Starting vaultOFF app...');
   EnvConfig.printConfigStatus();
 
   // Initialize KeyManager and crypto safely

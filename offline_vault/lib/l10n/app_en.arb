@@ -1,6 +1,6 @@
 {
   "@@locale": "en",
-  "appName": "Offline Vault",
+  "appName": "vaultOFF",
   "onboardingTitle1": "Sync once",
   "onboardingBody1": "Upload your photos and documents. They sync to every device in your group.",
   "onboardingTitle2": "View anywhere, offline",
@@ -9,7 +9,7 @@
   "onboardingBody3": "Only people with your group code can see your files. Everything is encrypted.",
   "onboardingNext": "Next",
   "onboardingGetStarted": "Get Started",
-  "signInTitle": "Welcome to Offline Vault",
+  "signInTitle": "Welcome to vaultOFF",
   "signInSubtitle": "Sign in to access your vaults",
   "continueWithGoogle": "Continue with Google",
   "orSignInWithEmail": "or sign in with email",

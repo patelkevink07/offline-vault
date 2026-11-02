@@ -1,6 +1,6 @@
 {
   "@@locale": "hi",
-  "appName": "ऑफ़लाइन वॉल्ट",
+  "appName": "vaultOFF",
   "onboardingTitle1": "एक बार सिंक करें",
   "onboardingBody1": "अपनी फ़ोटो और दस्तावेज़ अपलोड करें। वे आपके ग्रुप के हर डिवाइस पर सिंक हो जाते हैं।",
   "onboardingTitle2": "कहीं भी देखें, ऑफ़लाइन",
@@ -9,7 +9,7 @@
   "onboardingBody3": "केवल आपके ग्रुप कोड वाले लोग ही आपकी फ़ाइलें देख सकते हैं। सब कुछ एन्क्रिप्टेड है।",
   "onboardingNext": "आगे",
   "onboardingGetStarted": "शुरू करें",
-  "signInTitle": "ऑफ़लाइन वॉल्ट में आपका स्वागत है",
+  "signInTitle": "vaultOFF में आपका स्वागत है",
   "signInSubtitle": "अपनी वॉल्ट तक पहुँचने के लिए साइन इन करें",
   "continueWithGoogle": "Google से जारी रखें",
   "orSignInWithEmail": "या ईमेल से साइन इन करें",

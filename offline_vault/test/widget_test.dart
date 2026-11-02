@@ -68,7 +68,7 @@ void main() {
     await tester.pumpWidget(createTestApp(const SignInScreen()));
     await tester.pumpAndSettle();
 
-    expect(find.text('Welcome to Offline Vault'), findsOneWidget);
+    expect(find.text('Welcome to vaultOFF'), findsOneWidget);
     expect(find.text('Continue with Google'), findsOneWidget);
     expect(find.text('Send code'), findsOneWidget);
 

@@ -9,7 +9,7 @@ class AppLocalizationsGu extends AppLocalizations {
   AppLocalizationsGu([String locale = 'gu']) : super(locale);
 
   @override
-  String get appName => 'ઑફલાઇન વૉલ્ટ';
+  String get appName => 'vaultOFF';
 
   @override
   String get onboardingTitle1 => 'એક વાર સિંક કરો';
@@ -39,7 +39,7 @@ class AppLocalizationsGu extends AppLocalizations {
   String get onboardingGetStarted => 'શરૂ કરો';
 
   @override
-  String get signInTitle => 'ઑફલાઇન વૉલ્ટમાં સ્વાગત છે';
+  String get signInTitle => 'vaultOFF માં સ્વાગત છે';
 
   @override
   String get signInSubtitle => 'તમારી વૉલ્ટ ઍક્સેસ કરવા સાઇન ઇન કરો';

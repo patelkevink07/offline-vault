@@ -9,7 +9,7 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get appName => 'Offline Vault';
+  String get appName => 'vaultOFF';
 
   @override
   String get onboardingTitle1 => 'Sync once';
@@ -39,7 +39,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get onboardingGetStarted => 'Get Started';
 
   @override
-  String get signInTitle => 'Welcome to Offline Vault';
+  String get signInTitle => 'Welcome to vaultOFF';
 
   @override
   String get signInSubtitle => 'Sign in to access your vaults';

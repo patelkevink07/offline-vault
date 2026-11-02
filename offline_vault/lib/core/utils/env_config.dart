@@ -16,7 +16,8 @@ class EnvConfig {
 
   static const String googleWebClientId = String.fromEnvironment(
     'GOOGLE_WEB_CLIENT_ID',
-    defaultValue: '',
+    defaultValue:
+        '208697785706-748hcl816ah24bdb3inkkdf2s9lo56nr.apps.googleusercontent.com',
   );
 
   static bool get isConfigured =>

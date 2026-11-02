@@ -1,6 +1,6 @@
 {
   "@@locale": "gu",
-  "appName": "ઑફલાઇન વૉલ્ટ",
+  "appName": "vaultOFF",
   "onboardingTitle1": "એક વાર સિંક કરો",
   "onboardingBody1": "તમારા ફોટા અને દસ્તાવેજો અપલોડ કરો. તે તમારા ગ્રુપના દરેક ઉપકરણ પર સિંક થાય છે.",
   "onboardingTitle2": "ગમે ત્યાં જુઓ, ઑફલાઇન",
@@ -9,7 +9,7 @@
   "onboardingBody3": "માત્ર તમારો ગ્રુપ કોડ ધરાવતા લોકો જ તમારી ફાઇલો જોઈ શકે છે. બધું એન્ક્રિપ્ટેડ છે.",
   "onboardingNext": "આગળ",
   "onboardingGetStarted": "શરૂ કરો",
-  "signInTitle": "ઑફલાઇન વૉલ્ટમાં સ્વાગત છે",
+  "signInTitle": "vaultOFF માં સ્વાગત છે",
   "signInSubtitle": "તમારી વૉલ્ટ ઍક્સેસ કરવા સાઇન ઇન કરો",
   "continueWithGoogle": "Google સાથે ચાલુ રાખો",
   "orSignInWithEmail": "અથવા ઇમેઇલથી સાઇન ઇન કરો",
