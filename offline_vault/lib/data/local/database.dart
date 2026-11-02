@@ -345,9 +345,11 @@ class FilesDao extends DatabaseAccessor<AppDatabase> with _$FilesDaoMixin {
 
     final pattern = '%${trimmed.toLowerCase()}%';
     return (select(localFiles)
-          ..where((t) =>
-              t.name.lower().like(pattern) |
-              t.note.lower().like(pattern)))
+          ..where(
+            (t) =>
+                t.name.lower().like(pattern) |
+                t.note.lower().like(pattern),
+          ))
         .get();
   }
 }

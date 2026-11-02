@@ -66,11 +66,4 @@ class FoldersRepository {
     } catch (_) {}
     await _db.foldersDao.deleteById(folderId);
   }
-        .from('folders')
-        .update({'deleted': true})
-        .eq('id', folderId);
-
-    // Delete locally
-    await _db.foldersDao.deleteById(folderId);
-  }
 }

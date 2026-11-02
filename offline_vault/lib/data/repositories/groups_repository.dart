@@ -67,7 +67,7 @@ class GroupsRepository {
           'name': name,
           'color': color,
           'myRole': 'owner',
-        }
+        },
       };
     }
   }
@@ -109,7 +109,7 @@ class GroupsRepository {
           'name': groupName,
           'color': '#0F5C5A',
           'myRole': 'viewer',
-        }
+        },
       };
     }
   }

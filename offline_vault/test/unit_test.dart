@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
