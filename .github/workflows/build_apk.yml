@@ -39,7 +39,13 @@ jobs:
 
       - name: Build Android APK
         working-directory: offline_vault
-        run: flutter build apk --debug --verbose
+        run: |
+          set +e
+          flutter build apk --debug > build_output.log 2>&1
+          EXIT_CODE=$?
+          echo "=== GRADLE LOG TAIL ==="
+          tail -n 100 build_output.log
+          exit $EXIT_CODE
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
