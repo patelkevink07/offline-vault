@@ -41,7 +41,6 @@ dependencies:
   google_sign_in: ^6.2.1
 
   # Background work & Network
-  workmanager: ^0.5.2
   connectivity_plus: ^6.0.3
   dio: ^5.4.3+1
 
