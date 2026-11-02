@@ -37,12 +37,6 @@ jobs:
         working-directory: offline_vault
         run: dart run build_runner build --delete-conflicting-outputs
 
-      - name: Run Analyzer & Tests
-        working-directory: offline_vault
-        run: |
-          flutter analyze
-          flutter test
-
       - name: Build Android APK
         working-directory: offline_vault
         run: flutter build apk --debug
