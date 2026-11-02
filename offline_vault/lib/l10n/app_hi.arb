@@ -1,0 +1,88 @@
+{
+  "@@locale": "hi",
+  "appName": "ऑफ़लाइन वॉल्ट",
+  "onboardingTitle1": "एक बार सिंक करें",
+  "onboardingBody1": "अपनी फ़ोटो और दस्तावेज़ अपलोड करें। वे आपके ग्रुप के हर डिवाइस पर सिंक हो जाते हैं।",
+  "onboardingTitle2": "कहीं भी देखें, ऑफ़लाइन",
+  "onboardingBody2": "एक बार सिंक होने के बाद, फ़ाइलें आपके फ़ोन में सहेजी जाती हैं। उन्हें देखने के लिए कभी भी इंटरनेट की ज़रूरत नहीं।",
+  "onboardingTitle3": "आपके ग्रुप के लिए निजी",
+  "onboardingBody3": "केवल आपके ग्रुप कोड वाले लोग ही आपकी फ़ाइलें देख सकते हैं। सब कुछ एन्क्रिप्टेड है।",
+  "onboardingNext": "आगे",
+  "onboardingGetStarted": "शुरू करें",
+  "signInTitle": "ऑफ़लाइन वॉल्ट में आपका स्वागत है",
+  "signInSubtitle": "अपनी वॉल्ट तक पहुँचने के लिए साइन इन करें",
+  "continueWithGoogle": "Google से जारी रखें",
+  "orSignInWithEmail": "या ईमेल से साइन इन करें",
+  "emailHint": "अपना ईमेल पता दर्ज करें",
+  "sendCode": "कोड भेजें",
+  "enterCode": "{email} पर भेजा गया 6-अंकों का कोड दर्ज करें",
+  "@enterCode": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "verifyCode": "सत्यापित करें",
+  "invalidEmail": "कृपया एक मान्य ईमेल पता दर्ज करें",
+  "codeSent": "कोड भेज दिया गया! अपना ईमेल देखें।",
+  "invalidCode": "आपने जो कोड दर्ज किया है वह गलत है। कृपया पुनः प्रयास करें।",
+  "signInError": "कुछ गलत हो गया। कृपया पुनः प्रयास करें।",
+  "groupsHomeTitle": "आपकी वॉल्ट",
+  "createGroup": "ग्रुप बनाएँ",
+  "joinWithCode": "कोड से जुड़ें",
+  "emptyGroupsTitle": "अभी कोई वॉल्ट नहीं",
+  "emptyGroupsBody": "अपनी पहली वॉल्ट बनाएँ या किसी भरोसेमंद व्यक्ति के कोड से जुड़ें।",
+  "filesCount": "{count, plural, =0{कोई फ़ाइल नहीं} =1{1 फ़ाइल} other{{count} फ़ाइलें}}",
+  "@filesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "membersCount": "{count, plural, =1{1 सदस्य} other{{count} सदस्य}}",
+  "@membersCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "sizeOnDevice": "इस फ़ोन पर {size}",
+  "@sizeOnDevice": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "syncStatusSynced": "अप टू डेट",
+  "syncStatusSyncing": "सिंक हो रहा है…",
+  "syncStatusOffline": "ऑफ़लाइन",
+  "syncStatusWaiting": "कनेक्शन की प्रतीक्षा में",
+  "lastSynced": "अंतिम सिंक {time}",
+  "@lastSynced": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "settings": "सेटिंग्स",
+  "syncCentre": "सिंक सेंटर",
+  "pullToRefresh": "रिफ़्रेश करने के लिए खींचें",
+  "signOut": "साइन आउट",
+  "cancel": "रद्द करें",
+  "ok": "ठीक है",
+  "retry": "पुनः प्रयास करें",
+  "error": "त्रुटि",
+  "loading": "लोड हो रहा है…",
+  "noConnection": "कनेक्शन नहीं है",
+  "offlineReady": "ऑफ़लाइन उपलब्ध",
+  "downloading": "डाउनलोड हो रहा है…",
+  "uploadPending": "अपलोड बाकी है",
+  "syncFailed": "सिंक विफल",
+  "networkErrorMessage": "अपना इंटरनेट कनेक्शन जाँचें और पुनः प्रयास करें।",
+  "unknownError": "कुछ अनपेक्षित हुआ। कृपया पुनः प्रयास करें।"
+}

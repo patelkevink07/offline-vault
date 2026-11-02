@@ -1,0 +1,88 @@
+{
+  "@@locale": "gu",
+  "appName": "ઑફલાઇન વૉલ્ટ",
+  "onboardingTitle1": "એક વાર સિંક કરો",
+  "onboardingBody1": "તમારા ફોટા અને દસ્તાવેજો અપલોડ કરો. તે તમારા ગ્રુપના દરેક ઉપકરણ પર સિંક થાય છે.",
+  "onboardingTitle2": "ગમે ત્યાં જુઓ, ઑફલાઇન",
+  "onboardingBody2": "એક વાર સિંક થયા પછી, ફાઇલો તમારા ફોનમાં સંગ્રહિત થાય છે. જોવા માટે ક્યારેય ઇન્ટરનેટની જરૂર નથી.",
+  "onboardingTitle3": "તમારા ગ્રુપ માટે ખાનગી",
+  "onboardingBody3": "માત્ર તમારો ગ્રુપ કોડ ધરાવતા લોકો જ તમારી ફાઇલો જોઈ શકે છે. બધું એન્ક્રિપ્ટેડ છે.",
+  "onboardingNext": "આગળ",
+  "onboardingGetStarted": "શરૂ કરો",
+  "signInTitle": "ઑફલાઇન વૉલ્ટમાં સ્વાગત છે",
+  "signInSubtitle": "તમારી વૉલ્ટ ઍક્સેસ કરવા સાઇન ઇન કરો",
+  "continueWithGoogle": "Google સાથે ચાલુ રાખો",
+  "orSignInWithEmail": "અથવા ઇમેઇલથી સાઇન ઇન કરો",
+  "emailHint": "તમારું ઇમેઇલ સરનામું દાખલ કરો",
+  "sendCode": "કોડ મોકલો",
+  "enterCode": "{email} પર મોકલેલો 6-અંકનો કોડ દાખલ કરો",
+  "@enterCode": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "verifyCode": "ચકાસો",
+  "invalidEmail": "કૃપા કરીને માન્ય ઇમેઇલ સરનામું દાખલ કરો",
+  "codeSent": "કોડ મોકલ્યો! તમારું ઇમેઇલ તપાસો.",
+  "invalidCode": "તમે દાખલ કરેલો કોડ ખોટો છે. કૃપા કરીને ફરી પ્રયાસ કરો.",
+  "signInError": "કંઈક ખોટું થયું. કૃપા કરીને ફરી પ્રયાસ કરો.",
+  "groupsHomeTitle": "તમારી વૉલ્ટ",
+  "createGroup": "ગ્રુપ બનાવો",
+  "joinWithCode": "કોડ વડે જોડાઓ",
+  "emptyGroupsTitle": "હજી કોઈ વૉલ્ટ નથી",
+  "emptyGroupsBody": "તમારી પહેલી વૉલ્ટ બનાવો અથવા તમે જેના પર વિશ્વાસ કરો છો તેના કોડ વડે જોડાઓ.",
+  "filesCount": "{count, plural, =0{કોઈ ફાઇલ નથી} =1{1 ફાઇલ} other{{count} ફાઇલો}}",
+  "@filesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "membersCount": "{count, plural, =1{1 સભ્ય} other{{count} સભ્યો}}",
+  "@membersCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "sizeOnDevice": "આ ફોન પર {size}",
+  "@sizeOnDevice": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "syncStatusSynced": "અપ ટુ ડેટ",
+  "syncStatusSyncing": "સિંક થઈ રહ્યું છે…",
+  "syncStatusOffline": "ઑફલાઇન",
+  "syncStatusWaiting": "કનેક્શનની રાહ જોઈ રહ્યા છીએ",
+  "lastSynced": "છેલ્લું સિંક {time}",
+  "@lastSynced": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "settings": "સેટિંગ્સ",
+  "syncCentre": "સિંક સેન્ટર",
+  "pullToRefresh": "રિફ્રેશ કરવા ખેંચો",
+  "signOut": "સાઇન આઉટ",
+  "cancel": "રદ કરો",
+  "ok": "ઠીક",
+  "retry": "ફરી પ્રયાસ કરો",
+  "error": "ભૂલ",
+  "loading": "લોડ થઈ રહ્યું છે…",
+  "noConnection": "કનેક્શન નથી",
+  "offlineReady": "ઑફલાઇન ઉપલબ્ધ",
+  "downloading": "ડાઉનલોડ થઈ રહ્યું છે…",
+  "uploadPending": "અપલોડ બાકી છે",
+  "syncFailed": "સિંક નિષ્ફળ થયું",
+  "networkErrorMessage": "તમારું ઇન્ટરનેટ કનેક્શન તપાસો અને ફરી પ્રયાસ કરો.",
+  "unknownError": "કંઈક અણધાર્યું થયું. કૃપા કરીને ફરી પ્રયાસ કરો."
+}

@@ -1,0 +1,88 @@
+{
+  "@@locale": "en",
+  "appName": "Offline Vault",
+  "onboardingTitle1": "Sync once",
+  "onboardingBody1": "Upload your photos and documents. They sync to every device in your group.",
+  "onboardingTitle2": "View anywhere, offline",
+  "onboardingBody2": "Once synced, files are stored on your phone. No internet needed to view them — ever.",
+  "onboardingTitle3": "Private to your group",
+  "onboardingBody3": "Only people with your group code can see your files. Everything is encrypted.",
+  "onboardingNext": "Next",
+  "onboardingGetStarted": "Get Started",
+  "signInTitle": "Welcome to Offline Vault",
+  "signInSubtitle": "Sign in to access your vaults",
+  "continueWithGoogle": "Continue with Google",
+  "orSignInWithEmail": "or sign in with email",
+  "emailHint": "Enter your email address",
+  "sendCode": "Send code",
+  "enterCode": "Enter the 6-digit code sent to {email}",
+  "@enterCode": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "verifyCode": "Verify",
+  "invalidEmail": "Please enter a valid email address",
+  "codeSent": "Code sent! Check your email.",
+  "invalidCode": "The code you entered is incorrect. Please try again.",
+  "signInError": "Something went wrong. Please try again.",
+  "groupsHomeTitle": "Your Vaults",
+  "createGroup": "Create group",
+  "joinWithCode": "Join with code",
+  "emptyGroupsTitle": "No vaults yet",
+  "emptyGroupsBody": "Create your first vault or join one with a code from someone you trust.",
+  "filesCount": "{count, plural, =0{No files} =1{1 file} other{{count} files}}",
+  "@filesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "membersCount": "{count, plural, =1{1 member} other{{count} members}}",
+  "@membersCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "sizeOnDevice": "{size} on this phone",
+  "@sizeOnDevice": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "syncStatusSynced": "Up to date",
+  "syncStatusSyncing": "Syncing…",
+  "syncStatusOffline": "Offline",
+  "syncStatusWaiting": "Waiting for connection",
+  "lastSynced": "Last synced {time}",
+  "@lastSynced": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "settings": "Settings",
+  "syncCentre": "Sync Centre",
+  "pullToRefresh": "Pull to refresh",
+  "signOut": "Sign out",
+  "cancel": "Cancel",
+  "ok": "OK",
+  "retry": "Retry",
+  "error": "Error",
+  "loading": "Loading…",
+  "noConnection": "No connection",
+  "offlineReady": "Available offline",
+  "downloading": "Downloading…",
+  "uploadPending": "Upload pending",
+  "syncFailed": "Sync failed",
+  "networkErrorMessage": "Check your internet connection and try again.",
+  "unknownError": "Something unexpected happened. Please try again."
+}

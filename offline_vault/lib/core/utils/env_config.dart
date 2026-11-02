@@ -1,0 +1,27 @@
+import 'package:flutter/foundation.dart';
+
+/// Central environment configuration.
+/// Values are read from compile-time `--dart-define` with fallbacks.
+class EnvConfig {
+  static const String supabaseUrl = String.fromEnvironment(
+    'SUPABASE_URL',
+    defaultValue: 'http://10.0.2.2:54321', // Android emulator default for local Supabase
+  );
+
+  static const String supabaseAnonKey = String.fromEnvironment(
+    'SUPABASE_ANON_KEY',
+    defaultValue: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.dummy_anon_key_for_development',
+  );
+
+  static bool get isConfigured =>
+      supabaseUrl.isNotEmpty &&
+      supabaseAnonKey.isNotEmpty &&
+      !supabaseAnonKey.contains('dummy');
+
+  static void printConfigStatus() {
+    if (kDebugMode) {
+      debugPrint('[EnvConfig] Supabase URL: $supabaseUrl');
+      debugPrint('[EnvConfig] Anon Key configured: ${supabaseAnonKey.isNotEmpty}');
+    }
+  }
+}

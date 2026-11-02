@@ -1,0 +1,189 @@
+// ignore: unused_import
+import 'package:intl/intl.dart' as intl;
+import 'app_localizations.dart';
+
+// ignore_for_file: type=lint
+
+/// The translations for Hindi (`hi`).
+class AppLocalizationsHi extends AppLocalizations {
+  AppLocalizationsHi([String locale = 'hi']) : super(locale);
+
+  @override
+  String get appName => 'ऑफ़लाइन वॉल्ट';
+
+  @override
+  String get onboardingTitle1 => 'एक बार सिंक करें';
+
+  @override
+  String get onboardingBody1 =>
+      'अपनी फ़ोटो और दस्तावेज़ अपलोड करें। वे आपके ग्रुप के हर डिवाइस पर सिंक हो जाते हैं।';
+
+  @override
+  String get onboardingTitle2 => 'कहीं भी देखें, ऑफ़लाइन';
+
+  @override
+  String get onboardingBody2 =>
+      'एक बार सिंक होने के बाद, फ़ाइलें आपके फ़ोन में सहेजी जाती हैं। उन्हें देखने के लिए कभी भी इंटरनेट की ज़रूरत नहीं।';
+
+  @override
+  String get onboardingTitle3 => 'आपके ग्रुप के लिए निजी';
+
+  @override
+  String get onboardingBody3 =>
+      'केवल आपके ग्रुप कोड वाले लोग ही आपकी फ़ाइलें देख सकते हैं। सब कुछ एन्क्रिप्टेड है।';
+
+  @override
+  String get onboardingNext => 'आगे';
+
+  @override
+  String get onboardingGetStarted => 'शुरू करें';
+
+  @override
+  String get signInTitle => 'ऑफ़लाइन वॉल्ट में आपका स्वागत है';
+
+  @override
+  String get signInSubtitle => 'अपनी वॉल्ट तक पहुँचने के लिए साइन इन करें';
+
+  @override
+  String get continueWithGoogle => 'Google से जारी रखें';
+
+  @override
+  String get orSignInWithEmail => 'या ईमेल से साइन इन करें';
+
+  @override
+  String get emailHint => 'अपना ईमेल पता दर्ज करें';
+
+  @override
+  String get sendCode => 'कोड भेजें';
+
+  @override
+  String enterCode(String email) {
+    return '$email पर भेजा गया 6-अंकों का कोड दर्ज करें';
+  }
+
+  @override
+  String get verifyCode => 'सत्यापित करें';
+
+  @override
+  String get invalidEmail => 'कृपया एक मान्य ईमेल पता दर्ज करें';
+
+  @override
+  String get codeSent => 'कोड भेज दिया गया! अपना ईमेल देखें।';
+
+  @override
+  String get invalidCode =>
+      'आपने जो कोड दर्ज किया है वह गलत है। कृपया पुनः प्रयास करें।';
+
+  @override
+  String get signInError => 'कुछ गलत हो गया। कृपया पुनः प्रयास करें।';
+
+  @override
+  String get groupsHomeTitle => 'आपकी वॉल्ट';
+
+  @override
+  String get createGroup => 'ग्रुप बनाएँ';
+
+  @override
+  String get joinWithCode => 'कोड से जुड़ें';
+
+  @override
+  String get emptyGroupsTitle => 'अभी कोई वॉल्ट नहीं';
+
+  @override
+  String get emptyGroupsBody =>
+      'अपनी पहली वॉल्ट बनाएँ या किसी भरोसेमंद व्यक्ति के कोड से जुड़ें।';
+
+  @override
+  String filesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count फ़ाइलें',
+      one: '1 फ़ाइल',
+      zero: 'कोई फ़ाइल नहीं',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String membersCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count सदस्य',
+      one: '1 सदस्य',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String sizeOnDevice(String size) {
+    return 'इस फ़ोन पर $size';
+  }
+
+  @override
+  String get syncStatusSynced => 'अप टू डेट';
+
+  @override
+  String get syncStatusSyncing => 'सिंक हो रहा है…';
+
+  @override
+  String get syncStatusOffline => 'ऑफ़लाइन';
+
+  @override
+  String get syncStatusWaiting => 'कनेक्शन की प्रतीक्षा में';
+
+  @override
+  String lastSynced(String time) {
+    return 'अंतिम सिंक $time';
+  }
+
+  @override
+  String get settings => 'सेटिंग्स';
+
+  @override
+  String get syncCentre => 'सिंक सेंटर';
+
+  @override
+  String get pullToRefresh => 'रिफ़्रेश करने के लिए खींचें';
+
+  @override
+  String get signOut => 'साइन आउट';
+
+  @override
+  String get cancel => 'रद्द करें';
+
+  @override
+  String get ok => 'ठीक है';
+
+  @override
+  String get retry => 'पुनः प्रयास करें';
+
+  @override
+  String get error => 'त्रुटि';
+
+  @override
+  String get loading => 'लोड हो रहा है…';
+
+  @override
+  String get noConnection => 'कनेक्शन नहीं है';
+
+  @override
+  String get offlineReady => 'ऑफ़लाइन उपलब्ध';
+
+  @override
+  String get downloading => 'डाउनलोड हो रहा है…';
+
+  @override
+  String get uploadPending => 'अपलोड बाकी है';
+
+  @override
+  String get syncFailed => 'सिंक विफल';
+
+  @override
+  String get networkErrorMessage =>
+      'अपना इंटरनेट कनेक्शन जाँचें और पुनः प्रयास करें।';
+
+  @override
+  String get unknownError => 'कुछ अनपेक्षित हुआ। कृपया पुनः प्रयास करें।';
+}
