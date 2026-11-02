@@ -19,20 +19,18 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Set up Android NDK (r26d)
-        uses: nttld/setup-ndk@v1
-        with:
-          ndk-version: r26d
-          link-to-sdk: true
-
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
           cache: true
+
+      - name: Pre-accept Android SDK Licenses
+        run: |
+          SDK_DIR="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-/usr/local/lib/android/sdk}}"
+          mkdir -p "$SDK_DIR/licenses"
+          printf "24333f8a63b6825ea9c5514f83c2829b004d1fee\nd56f5187479451eabf01fb78af6dfcb131a6481e\n84831b9409646a918e30573bab4c9c91346d8abd\n" > "$SDK_DIR/licenses/android-sdk-license"
+          printf "84831b9409646a918e30573bab4c9c91346d8abd\n" > "$SDK_DIR/licenses/android-sdk-preview-license"
 
       - name: Get Dependencies
         working-directory: offline_vault
@@ -48,21 +46,11 @@ jobs:
 
       - name: Build Android APK
         working-directory: offline_vault
-        run: flutter build apk --debug -v
+        run: flutter build apk --debug
 
       - name: Upload APK Artifact
-        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: offline-vault-debug-apk
-          path: offline_vault/build/app/outputs/flutter-apk/*.apk
+          path: offline_vault/build/app/outputs/flutter-apk/app-debug.apk
           retention-days: 14
-
-      - name: Upload Build Reports & Logs on Failure
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: gradle-failure-reports
-          path: |
-            offline_vault/build/app/reports/
-            offline_vault/build/app/outputs/logs/

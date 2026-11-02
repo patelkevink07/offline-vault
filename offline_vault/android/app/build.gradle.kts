@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "com.offlinevault.offline_vault"
-    compileSdk = 34
+    compileSdk = 35
     ndkVersion = "26.3.11579264"
 
     compileOptions {
@@ -22,7 +22,7 @@ android {
     defaultConfig {
         applicationId = "com.offlinevault.offline_vault"
         minSdk = 26
-        targetSdk = 34
+        targetSdk = 35
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
