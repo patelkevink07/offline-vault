@@ -5,13 +5,13 @@ import 'package:flutter/foundation.dart';
 class EnvConfig {
   static const String supabaseUrl = String.fromEnvironment(
     'SUPABASE_URL',
-    defaultValue: 'http://10.0.2.2:54321', // Android emulator default for local Supabase
+    defaultValue: 'https://tdjpjkumjtuvsiabxmbl.supabase.co',
   );
 
   static const String supabaseAnonKey = String.fromEnvironment(
     'SUPABASE_ANON_KEY',
     defaultValue:
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6InN1cGFiYXNlIiwiaWF0IjoxNjAwMDAwMDAwLCJleHAiOjIwMDAwMDAwMDB9.c2lnbmF0dXJlX2Zvcl9kZXZlbG9wbWVudF90ZXN0aW5nX29ubHk',
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRkanBqa3VtanR1dnNpYWJ4bWJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM2MTk0MDIsImV4cCI6MjEwOTE5NTQwMn0.18qRlXuj-u71BZWays0JwEoxycanXSFthlP_UaxSh4M',
   );
 
   static const String googleWebClientId = String.fromEnvironment(

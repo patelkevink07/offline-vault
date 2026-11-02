@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/utils/env_config.dart';
 import '../../../core/utils/logger.dart';
 import '../../../data/repositories/auth_repository.dart';
 
@@ -47,6 +48,13 @@ class AuthController extends StateNotifier<AuthStateData> {
   final AuthRepository _repository;
 
   Future<void> signInWithGoogle() async {
+    if (EnvConfig.googleWebClientId.isEmpty) {
+      state = const AuthError(
+        message:
+            'Google OAuth is not configured yet. Sign in with Email OTP above or tap "Offline Vault Mode" below.',
+      );
+      return;
+    }
     state = const AuthLoading();
     try {
       await _repository.signInWithGoogle();
