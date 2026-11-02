@@ -55,6 +55,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
 
     final isLoading = authState is AuthLoading;
     final isOtpSent = authState is AuthOtpSent;
+    final otpError = authState is AuthOtpSent ? authState.errorMessage : null;
 
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,
@@ -215,6 +216,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                       decoration: InputDecoration(
                         hintText: '000000',
                         counterText: '',
+                        errorText: otpError,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -225,12 +227,12 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                       onPressed: isLoading
                           ? null
                           : () {
-                              if (_otpController.text.length == 6) {
+                              if (_otpController.text.trim().length >= 6) {
                                 ref
                                     .read(authControllerProvider.notifier)
                                     .verifyEmailOtp(
                                       email: _emailController.text,
-                                      token: _otpController.text,
+                                      token: _otpController.text.trim(),
                                     );
                               }
                             },
@@ -249,15 +251,36 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                           : Text(l10n.verifyCode),
                     ),
                     const SizedBox(height: AppSpacing.sm),
-                    TextButton(
-                      onPressed: isLoading
-                          ? null
-                          : () {
-                              ref
-                                  .read(authControllerProvider.notifier)
-                                  .resetToInitial();
-                            },
-                      child: Text(l10n.cancel),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        TextButton.icon(
+                          onPressed: isLoading
+                              ? null
+                              : () {
+                                  ref
+                                      .read(authControllerProvider.notifier)
+                                      .sendEmailOtp(_emailController.text);
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('A fresh verification code was sent!'),
+                                    ),
+                                  );
+                                },
+                          icon: const Icon(Icons.refresh_rounded, size: 16),
+                          label: const Text('Resend Code'),
+                        ),
+                        TextButton(
+                          onPressed: isLoading
+                              ? null
+                              : () {
+                                  ref
+                                      .read(authControllerProvider.notifier)
+                                      .resetToInitial();
+                                },
+                          child: const Text('Change Email'),
+                        ),
+                      ],
                     ),
                   ],
 

@@ -17,8 +17,9 @@ class AuthLoading extends AuthStateData {
 }
 
 class AuthOtpSent extends AuthStateData {
-  const AuthOtpSent({required this.email});
+  const AuthOtpSent({required this.email, this.errorMessage});
   final String email;
+  final String? errorMessage;
 }
 
 class AuthAuthenticated extends AuthStateData {
@@ -108,7 +109,12 @@ class AuthController extends StateNotifier<AuthStateData> {
       state = const AuthAuthenticated();
     } catch (e, st) {
       VaultLogger.e('Verify OTP failed', e, st);
-      state = AuthError(message: e.toString());
+      final rawErr = e.toString().toLowerCase();
+      String userMessage = 'Invalid or expired OTP code. Please check your email or tap "Resend Code".';
+      if (rawErr.contains('network') || rawErr.contains('socket')) {
+        userMessage = 'Network error. Please check your connection or use Offline Vault Mode.';
+      }
+      state = AuthOtpSent(email: email, errorMessage: userMessage);
     }
   }
 

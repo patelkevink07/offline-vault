@@ -102,41 +102,53 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
 
     setState(() => _isUploading = true);
 
-    final queueRepo = ref.read(uploadQueueRepositoryProvider);
-    final keyManager = KeyManager();
-    final crypto = CryptoService(keyManager: keyManager);
-    final storage = FileStorageService(cryptoService: crypto);
+    try {
+      final queueRepo = ref.read(uploadQueueRepositoryProvider);
+      final keyManager = KeyManager();
+      final crypto = CryptoService(keyManager: keyManager);
+      final storage = FileStorageService(cryptoService: crypto);
 
-    for (final item in _selectedItems) {
-      String customName = item.nameController.text.trim();
-      if (customName.isEmpty) {
-        customName = item.file.path.split(Platform.pathSeparator).last;
+      for (final item in _selectedItems) {
+        String customName = item.nameController.text.trim();
+        if (customName.isEmpty) {
+          customName = item.file.path.split(Platform.pathSeparator).last;
+        }
+        final mime = lookupMimeType(item.file.path) ??
+            (item.isPdf ? 'application/pdf' : 'application/octet-stream');
+
+        await queueRepo.enqueueAndProcessFile(
+          localPath: item.file.path,
+          groupId: widget.groupId,
+          folderId: widget.folderId,
+          name: customName,
+          mime: mime,
+          storageService: storage,
+          quality: _selectedQuality,
+        );
       }
-      final mime = lookupMimeType(item.file.path) ??
-          (item.isPdf ? 'application/pdf' : 'application/octet-stream');
 
-      final queueId = await queueRepo.enqueueFile(
-        localPath: item.file.path,
-        groupId: widget.groupId,
-        folderId: widget.folderId,
-        name: customName,
-        mime: mime,
-      );
-
-      // Process upload immediately
-      final queueItems = await queueRepo.watchQueue(widget.groupId).first;
-      final queueItem = queueItems.firstWhere((q) => q.id == queueId);
-
-      await queueRepo.processQueueItem(
-        item: queueItem,
-        storageService: storage,
-        quality: _selectedQuality,
-      );
-    }
-
-    if (mounted) {
-      setState(() => _isUploading = false);
-      context.pop();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Files saved and encrypted in vault!'),
+            backgroundColor: AppColors.success,
+          ),
+        );
+        context.pop();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Upload failed: $e'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isUploading = false);
+      }
     }
   }
 

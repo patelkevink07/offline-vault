@@ -15,6 +15,7 @@ class JoinGroupScreen extends ConsumerStatefulWidget {
 
 class _JoinGroupScreenState extends ConsumerState<JoinGroupScreen> {
   final _codeController = TextEditingController();
+  MobileScannerController? _scannerController;
   bool _isScanning = false;
   bool _isJoining = false;
   String? _errorMessage;
@@ -22,13 +23,31 @@ class _JoinGroupScreenState extends ConsumerState<JoinGroupScreen> {
   @override
   void dispose() {
     _codeController.dispose();
+    _scannerController?.dispose();
     super.dispose();
   }
 
+  void _startScanner() {
+    _scannerController?.dispose();
+    _scannerController = MobileScannerController(
+      detectionSpeed: DetectionSpeed.noDuplicates,
+    );
+    setState(() {
+      _isScanning = true;
+      _errorMessage = null;
+    });
+  }
+
+  void _stopScanner() {
+    _scannerController?.dispose();
+    _scannerController = null;
+    setState(() => _isScanning = false);
+  }
+
   Future<void> _joinWithCode(String rawCode) async {
-    final code = rawCode.replaceAll('-', '').replaceAll(' ', '').trim();
-    if (code.length != 8) {
-      setState(() => _errorMessage = 'Please enter an 8-character invite code');
+    final code = rawCode.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '').trim().toUpperCase();
+    if (code.length < 6 || code.length > 16) {
+      setState(() => _errorMessage = 'Please enter a valid invite code (e.g. XXXX-XXXX)');
       return;
     }
 
@@ -65,17 +84,45 @@ class _JoinGroupScreenState extends ConsumerState<JoinGroupScreen> {
           children: [
             if (_isScanning) ...[
               SizedBox(
-                height: 300,
+                height: 320,
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(16),
                   child: MobileScanner(
+                    controller: _scannerController,
+                    errorBuilder: (context, error, child) {
+                      return Container(
+                        color: Colors.black87,
+                        padding: const EdgeInsets.all(16),
+                        child: Center(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.camera_alt_outlined, color: Colors.white, size: 48),
+                              const SizedBox(height: 12),
+                              Text(
+                                'Camera access required to scan QR code.',
+                                textAlign: TextAlign.center,
+                                style: theme.textTheme.bodyMedium?.copyWith(color: Colors.white),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                'Please enable Camera permission in your phone Settings.',
+                                textAlign: TextAlign.center,
+                                style: theme.textTheme.bodySmall?.copyWith(color: Colors.white70),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
                     onDetect: (capture) {
                       final barcodes = capture.barcodes;
                       for (final barcode in barcodes) {
-                        if (barcode.rawValue != null) {
-                          setState(() => _isScanning = false);
-                          _codeController.text = barcode.rawValue!;
-                          _joinWithCode(barcode.rawValue!);
+                        final val = barcode.rawValue;
+                        if (val != null && val.isNotEmpty) {
+                          _stopScanner();
+                          _codeController.text = val;
+                          _joinWithCode(val);
                           break;
                         }
                       }
@@ -84,9 +131,10 @@ class _JoinGroupScreenState extends ConsumerState<JoinGroupScreen> {
                 ),
               ),
               const SizedBox(height: AppSpacing.md),
-              TextButton(
-                onPressed: () => setState(() => _isScanning = false),
-                child: const Text('Cancel QR Scan'),
+              OutlinedButton.icon(
+                onPressed: _stopScanner,
+                icon: const Icon(Icons.close_rounded),
+                label: const Text('Cancel QR Scan'),
               ),
             ] else ...[
               Center(
@@ -140,7 +188,7 @@ class _JoinGroupScreenState extends ConsumerState<JoinGroupScreen> {
               const SizedBox(height: AppSpacing.md),
 
               OutlinedButton.icon(
-                onPressed: () => setState(() => _isScanning = true),
+                onPressed: _startScanner,
                 icon: const Icon(Icons.qr_code_scanner_rounded),
                 label: const Text('Scan QR Code'),
                 style: OutlinedButton.styleFrom(

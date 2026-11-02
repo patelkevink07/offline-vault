@@ -49,11 +49,31 @@ class AuthRemoteSource {
     required String token,
   }) async {
     VaultLogger.i('Verifying email OTP...');
-    return _supabase.auth.verifyOTP(
-      type: OtpType.email,
-      email: email.trim(),
-      token: token.trim(),
-    );
+    final trimmedEmail = email.trim();
+    final trimmedToken = token.trim();
+    try {
+      return await _supabase.auth.verifyOTP(
+        type: OtpType.email,
+        email: trimmedEmail,
+        token: trimmedToken,
+      );
+    } catch (e) {
+      VaultLogger.w('verifyOTP with OtpType.email failed ($e), trying OtpType.signup...');
+      try {
+        return await _supabase.auth.verifyOTP(
+          type: OtpType.signup,
+          email: trimmedEmail,
+          token: trimmedToken,
+        );
+      } catch (e2) {
+        VaultLogger.w('verifyOTP with OtpType.signup failed ($e2), trying OtpType.magiclink...');
+        return await _supabase.auth.verifyOTP(
+          type: OtpType.magiclink,
+          email: trimmedEmail,
+          token: trimmedToken,
+        );
+      }
+    }
   }
 
   /// Sign in using Google OAuth (Android native via google_sign_in + Supabase idToken).

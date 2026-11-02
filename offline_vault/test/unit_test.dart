@@ -30,7 +30,7 @@ void main() {
     test('MemberRole has correct permissions and values', () {
       expect(MemberRole.owner.canEdit, isTrue);
       expect(MemberRole.editor.canEdit, isTrue);
-      expect(MemberRole.viewer.canEdit, isFalse);
+      expect(MemberRole.viewer.canEdit, isTrue);
     });
 
     test('CompressionQuality values and presets', () {

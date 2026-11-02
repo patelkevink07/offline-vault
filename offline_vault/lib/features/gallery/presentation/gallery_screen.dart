@@ -28,6 +28,7 @@ class GalleryScreen extends ConsumerStatefulWidget {
 class _GalleryScreenState extends ConsumerState<GalleryScreen> {
   String _searchQuery = '';
   final _searchController = TextEditingController();
+  final Map<String, Uint8List> _thumbCache = {};
 
   @override
   void dispose() {
@@ -152,11 +153,17 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
   }
 
   Widget _buildThumbnailTile(LocalFile file) {
-    final hasThumb = file.localThumbPath != null && File(file.localThumbPath!).existsSync();
+    final thumbPath = (file.localThumbPath != null && File(file.localThumbPath!).existsSync())
+        ? file.localThumbPath
+        : (file.mime.startsWith('image/') && file.localOriginalPath != null && File(file.localOriginalPath!).existsSync())
+            ? file.localOriginalPath
+            : null;
+    final hasThumb = thumbPath != null;
     final isPdf = file.mime == 'application/pdf';
 
     return InkWell(
       onTap: () => context.push('/viewer/${file.id}?groupId=${widget.groupId}'),
+      onLongPress: () => _showFileOptions(file),
       borderRadius: BorderRadius.circular(8),
       child: Container(
         decoration: BoxDecoration(
@@ -169,15 +176,23 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
           fit: StackFit.expand,
           children: [
             if (hasThumb)
-              FutureBuilder(
-                future: _decryptThumb(file.localThumbPath!),
-                builder: (context, snapshot) {
-                  if (snapshot.hasData && snapshot.data != null) {
-                    return Image.memory(snapshot.data!, fit: BoxFit.cover);
-                  }
-                  return const Center(child: SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 1.5)));
-                },
-              )
+              _thumbCache.containsKey(thumbPath)
+                  ? Image.memory(_thumbCache[thumbPath]!, fit: BoxFit.cover)
+                  : FutureBuilder<Uint8List>(
+                      future: _decryptThumb(thumbPath),
+                      builder: (context, snapshot) {
+                        if (snapshot.hasData && snapshot.data != null) {
+                          return Image.memory(snapshot.data!, fit: BoxFit.cover);
+                        }
+                        return const Center(
+                          child: SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(strokeWidth: 1.5),
+                          ),
+                        );
+                      },
+                    )
             else
               Center(
                 child: Icon(
@@ -190,7 +205,7 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
             // Badge in corner for ready state
             Positioned(
               right: 4,
-              bottom: 4,
+              top: 4,
               child: Container(
                 padding: const EdgeInsets.all(2),
                 decoration: const BoxDecoration(
@@ -204,17 +219,85 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
                 ),
               ),
             ),
+
+            // Document name banner at bottom
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 3),
+                color: Colors.black.withValues(alpha: 0.65),
+                child: Text(
+                  file.name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 
-  Future<dynamic> _decryptThumb(String path) async {
+  Future<Uint8List> _decryptThumb(String path) async {
+    if (_thumbCache.containsKey(path)) return _thumbCache[path]!;
     final keyManager = KeyManager();
     final crypto = CryptoService(keyManager: keyManager);
     final storage = FileStorageService(cryptoService: crypto);
-    return storage.readDecryptedFile(path);
+    final bytes = await storage.readDecryptedFile(path);
+    _thumbCache[path] = bytes;
+    return bytes;
+  }
+
+  void _showFileOptions(LocalFile file) {
+    showModalBottomSheet(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Wrap(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.open_in_new_rounded),
+              title: const Text('Open File'),
+              onTap: () {
+                Navigator.pop(ctx);
+                context.push('/viewer/${file.id}?groupId=${widget.groupId}');
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.delete_outline_rounded, color: AppColors.lightError),
+              title: const Text('Delete File', style: TextStyle(color: AppColors.lightError)),
+              onTap: () async {
+                Navigator.pop(ctx);
+                final db = ref.read(databaseProvider);
+                await db.filesDao.deleteById(file.id);
+                if (file.localOriginalPath != null) {
+                  try {
+                    File(file.localOriginalPath!).deleteSync();
+                  } catch (_) {}
+                }
+                if (file.localThumbPath != null) {
+                  try {
+                    File(file.localThumbPath!).deleteSync();
+                  } catch (_) {}
+                }
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Deleted "${file.name}"')),
+                  );
+                }
+              },
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   void _showCreateFolderDialog(BuildContext context, FoldersRepository repo) {

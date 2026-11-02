@@ -20,8 +20,8 @@ enum MemberRole {
   /// Human-readable name for display in the UI.
   final String displayName;
 
-  /// Whether this role can upload files and create folders.
-  bool get canEdit => this == owner || this == editor;
+  /// Whether this role can upload files and create folders (all group members can share).
+  bool get canEdit => true;
 
   /// Whether this role can manage group members and settings.
   bool get canManageMembers => this == owner;

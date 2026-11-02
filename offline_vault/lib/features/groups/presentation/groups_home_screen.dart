@@ -4,8 +4,16 @@ import 'package:go_router/go_router.dart';
 
 import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_spacing.dart';
+import '../../../core/crypto/crypto_service.dart';
+import '../../../core/crypto/key_manager.dart';
+import '../../../core/network/connectivity_service.dart';
+import '../../../core/storage/file_storage_service.dart';
 import '../../../data/local/database.dart';
+import '../../../data/remote/supabase_client.dart';
+import '../../../data/repositories/groups_repository.dart';
+import '../../../data/repositories/upload_queue_repository.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../sync/sync_engine.dart';
 import '../application/groups_controller.dart';
 
 class GroupsHomeScreen extends ConsumerWidget {
@@ -94,7 +102,26 @@ class GroupsHomeScreen extends ConsumerWidget {
                 }
                 return RefreshIndicator(
                   onRefresh: () async {
-                    // Trigger sync
+                    try {
+                      final db = ref.read(databaseProvider);
+                      final supabase = ref.read(supabaseClientProvider);
+                      final remote = ref.read(groupsRemoteSourceProvider);
+                      final uploadQueue = ref.read(uploadQueueRepositoryProvider);
+                      final keyManager = KeyManager();
+                      final crypto = CryptoService(keyManager: keyManager);
+                      final storage = FileStorageService(cryptoService: crypto);
+                      final connectivity = ref.read(connectivityServiceProvider);
+
+                      final engine = SyncEngine(
+                        db: db,
+                        supabase: supabase,
+                        remoteSource: remote,
+                        uploadQueueRepo: uploadQueue,
+                        storageService: storage,
+                        connectivity: connectivity,
+                      );
+                      await engine.run(trigger: SyncTrigger.manual);
+                    } catch (_) {}
                   },
                   child: ListView.separated(
                     padding: const EdgeInsets.all(AppSpacing.lg),
@@ -293,9 +320,19 @@ class GroupsHomeScreen extends ConsumerWidget {
               final name = nameController.text.trim();
               if (name.isNotEmpty) {
                 Navigator.pop(ctx);
-                await ref
+                final res = await ref
                     .read(groupsControllerProvider.notifier)
                     .createGroup(name: name, color: selectedColor);
+                if (res != null && context.mounted) {
+                  final group = res['group'] as Map<String, dynamic>;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Vault "$name" created!'),
+                      backgroundColor: AppColors.success,
+                    ),
+                  );
+                  context.push('/group/${group['id']}');
+                }
               }
             },
             child: Text(l10n.ok),
