@@ -8,6 +8,7 @@ import '../../../core/crypto/crypto_service.dart';
 import '../../../core/crypto/key_manager.dart';
 import '../../../core/storage/file_storage_service.dart';
 import '../../../data/local/database.dart';
+import '../../../sync/sync_engine.dart';
 
 class FileViewerScreen extends ConsumerStatefulWidget {
   const FileViewerScreen({
@@ -51,7 +52,7 @@ class _FileViewerScreenState extends ConsumerState<FileViewerScreen> {
   Future<void> _loadFile() async {
     setState(() => _isLoading = true);
     final db = ref.read(databaseProvider);
-    final file = await db.filesDao.getById(widget.fileId);
+    var file = await db.filesDao.getById(widget.fileId);
 
     if (file == null) {
       setState(() {
@@ -62,11 +63,22 @@ class _FileViewerScreenState extends ConsumerState<FileViewerScreen> {
     }
 
     _file = file;
-    final path = file.localOriginalPath ?? file.localThumbPath;
+    var path = file.localOriginalPath ?? file.localThumbPath;
+
+    // Download on demand if not yet on local storage
+    if (path == null || !File(path).existsSync()) {
+      final syncEngine = ref.read(syncEngineProvider);
+      await syncEngine.downloadFile(file);
+      file = await db.filesDao.getById(widget.fileId);
+      if (file != null) {
+        _file = file;
+        path = file.localOriginalPath ?? file.localThumbPath;
+      }
+    }
 
     if (path == null || !File(path).existsSync()) {
       setState(() {
-        _errorMessage = 'File not yet downloaded to this device';
+        _errorMessage = 'File not yet downloaded to this device. Please connect to internet to download.';
         _isLoading = false;
       });
       return;
@@ -77,7 +89,7 @@ class _FileViewerScreenState extends ConsumerState<FileViewerScreen> {
       final crypto = CryptoService(keyManager: keyManager);
       final storage = FileStorageService(cryptoService: crypto);
 
-      if (file.mime.startsWith('image/')) {
+      if (file!.mime.startsWith('image/')) {
         final decrypted = await storage.readDecryptedFile(path);
         setState(() {
           _decryptedImageBytes = decrypted;

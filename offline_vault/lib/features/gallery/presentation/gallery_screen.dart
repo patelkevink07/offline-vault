@@ -11,6 +11,7 @@ import '../../../core/crypto/key_manager.dart';
 import '../../../core/storage/file_storage_service.dart';
 import '../../../data/local/database.dart';
 import '../../../data/repositories/folders_repository.dart';
+import '../../../sync/sync_engine.dart';
 
 class GalleryScreen extends ConsumerStatefulWidget {
   const GalleryScreen({
@@ -30,6 +31,19 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
   String _searchQuery = '';
   final _searchController = TextEditingController();
   final Map<String, Uint8List> _thumbCache = {};
+
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() => _triggerSync());
+  }
+
+  Future<void> _triggerSync() async {
+    try {
+      final syncEngine = ref.read(syncEngineProvider);
+      await syncEngine.syncGroup(widget.groupId);
+    } catch (_) {}
+  }
 
   @override
   void dispose() {
@@ -65,41 +79,53 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
           ),
         ],
       ),
-      body: StreamBuilder<List<LocalFolder>>(
-        stream: foldersRepo.watchFolders(widget.groupId, parentId: widget.folderId),
-        builder: (context, folderSnapshot) {
-          final folders = folderSnapshot.data ?? [];
+      body: RefreshIndicator(
+        onRefresh: _triggerSync,
+        child: StreamBuilder<List<LocalFolder>>(
+          stream: foldersRepo.watchFolders(widget.groupId, parentId: widget.folderId),
+          builder: (context, folderSnapshot) {
+            final folders = folderSnapshot.data ?? [];
 
-          return StreamBuilder<List<LocalFile>>(
-            stream: _searchQuery.isEmpty
-                ? db.filesDao.watchByGroup(widget.groupId, folderId: widget.folderId)
-                : Stream.fromFuture(db.filesDao.search(_searchQuery)),
-            builder: (context, fileSnapshot) {
-              final files = fileSnapshot.data ?? [];
+            return StreamBuilder<List<LocalFile>>(
+              stream: _searchQuery.isEmpty
+                  ? db.filesDao.watchByGroup(widget.groupId, folderId: widget.folderId)
+                  : Stream.fromFuture(db.filesDao.search(_searchQuery)),
+              builder: (context, fileSnapshot) {
+                final files = fileSnapshot.data ?? [];
 
-              if (folders.isEmpty && files.isEmpty) {
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                if (folders.isEmpty && files.isEmpty) {
+                  return ListView(
+                    physics: const AlwaysScrollableScrollPhysics(),
                     children: [
-                      Icon(Icons.inventory_2_outlined, size: 64, color: theme.colorScheme.primary.withValues(alpha: 0.4)),
-                      const SizedBox(height: AppSpacing.md),
-                      Text(
-                        'This vault folder is empty',
-                        style: theme.textTheme.titleMedium,
-                      ),
-                      const SizedBox(height: AppSpacing.xs),
-                      Text(
-                        'Tap the + button below to add photos or documents',
-                        style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurface.withValues(alpha: 0.6)),
+                      SizedBox(
+                        height: MediaQuery.of(context).size.height * 0.6,
+                        child: Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.inventory_2_outlined, size: 64, color: theme.colorScheme.primary.withValues(alpha: 0.4)),
+                              const SizedBox(height: AppSpacing.md),
+                              Text(
+                                'This vault folder is empty',
+                                style: theme.textTheme.titleMedium,
+                              ),
+                              const SizedBox(height: AppSpacing.xs),
+                              Text(
+                                'Tap the + button below to add photos or documents,\nor pull down to refresh from members',
+                                textAlign: TextAlign.center,
+                                style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurface.withValues(alpha: 0.6)),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                     ],
-                  ),
-                );
-              }
+                  );
+                }
 
-              return CustomScrollView(
-                slivers: [
+                return CustomScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  slivers: [
                   // Folders list if any
                   if (folders.isNotEmpty)
                     SliverToBoxAdapter(
@@ -146,7 +172,8 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
           );
         },
       ),
-      floatingActionButton: FloatingActionButton(
+    ),
+    floatingActionButton: FloatingActionButton(
         onPressed: () => context.push('/group/${widget.groupId}/upload'),
         child: const Icon(Icons.add_rounded),
       ),

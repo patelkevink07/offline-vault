@@ -3,14 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_spacing.dart';
-import '../../../core/crypto/crypto_service.dart';
-import '../../../core/crypto/key_manager.dart';
-import '../../../core/network/connectivity_service.dart';
-import '../../../core/storage/file_storage_service.dart';
 import '../../../data/local/database.dart';
-import '../../../data/remote/supabase_client.dart';
-import '../../../data/repositories/groups_repository.dart';
-import '../../../data/repositories/upload_queue_repository.dart';
 import '../../../sync/sync_engine.dart';
 
 class SyncCentreScreen extends ConsumerStatefulWidget {
@@ -25,25 +18,9 @@ class _SyncCentreScreenState extends ConsumerState<SyncCentreScreen> {
 
   Future<void> _triggerManualSync() async {
     setState(() => _isSyncing = true);
-    final db = ref.read(databaseProvider);
-    final supabase = ref.read(supabaseClientProvider);
-    final remote = ref.read(groupsRemoteSourceProvider);
-    final uploadQueue = ref.read(uploadQueueRepositoryProvider);
-    final keyManager = KeyManager();
-    final crypto = CryptoService(keyManager: keyManager);
-    final storage = FileStorageService(cryptoService: crypto);
-    final connectivity = ref.read(connectivityServiceProvider);
-
-    final engine = SyncEngine(
-      db: db,
-      supabase: supabase,
-      remoteSource: remote,
-      uploadQueueRepo: uploadQueue,
-      storageService: storage,
-      connectivity: connectivity,
-    );
-
-    await engine.run(trigger: SyncTrigger.manual);
+    try {
+      await ref.read(syncEngineProvider).run(trigger: SyncTrigger.manual);
+    } catch (_) {}
 
     if (mounted) {
       setState(() => _isSyncing = false);

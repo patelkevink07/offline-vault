@@ -4,14 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_spacing.dart';
-import '../../../core/crypto/crypto_service.dart';
-import '../../../core/crypto/key_manager.dart';
-import '../../../core/network/connectivity_service.dart';
-import '../../../core/storage/file_storage_service.dart';
 import '../../../data/local/database.dart';
-import '../../../data/remote/supabase_client.dart';
-import '../../../data/repositories/groups_repository.dart';
-import '../../../data/repositories/upload_queue_repository.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../sync/sync_engine.dart';
 import '../application/groups_controller.dart';
@@ -103,24 +96,7 @@ class GroupsHomeScreen extends ConsumerWidget {
                 return RefreshIndicator(
                   onRefresh: () async {
                     try {
-                      final db = ref.read(databaseProvider);
-                      final supabase = ref.read(supabaseClientProvider);
-                      final remote = ref.read(groupsRemoteSourceProvider);
-                      final uploadQueue = ref.read(uploadQueueRepositoryProvider);
-                      final keyManager = KeyManager();
-                      final crypto = CryptoService(keyManager: keyManager);
-                      final storage = FileStorageService(cryptoService: crypto);
-                      final connectivity = ref.read(connectivityServiceProvider);
-
-                      final engine = SyncEngine(
-                        db: db,
-                        supabase: supabase,
-                        remoteSource: remote,
-                        uploadQueueRepo: uploadQueue,
-                        storageService: storage,
-                        connectivity: connectivity,
-                      );
-                      await engine.run(trigger: SyncTrigger.manual);
+                      await ref.read(syncEngineProvider).run(trigger: SyncTrigger.manual);
                     } catch (_) {}
                   },
                   child: ListView.separated(
