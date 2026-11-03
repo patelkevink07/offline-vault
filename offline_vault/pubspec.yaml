@@ -43,7 +43,7 @@ dependencies:
   # Background work & Network
   connectivity_plus: ^6.0.3
   dio: ^5.4.3+1
-  workmanager: ">=0.5.2 <0.10.0"
+  workmanager: ^0.9.2
   android_intent_plus: ^5.0.2
 
   # Images & PDF
@@ -60,6 +60,7 @@ dependencies:
 
   # Crash Reporting
   sentry_flutter: ^8.3.0
+  workmanager_platform_interface: 0.9.3
 
 dev_dependencies:
   flutter_test:

@@ -115,7 +115,7 @@ void main() {
                 .having((c) => c.networkType, 'networkType', NetworkType.unmetered)
                 .having((c) => c.requiresCharging, 'requiresCharging', isTrue),
           ),
-          existingWorkPolicy: ExistingWorkPolicy.keep,
+          existingWorkPolicy: ExistingPeriodicWorkPolicy.keep,
           backoffPolicy: BackoffPolicy.linear,
           backoffPolicyDelay: const Duration(minutes: 15),
         ),

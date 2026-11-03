@@ -17,7 +17,12 @@ if (keystorePropertiesFile.exists()) {
 android {
     namespace = "com.offlinevault.offline_vault"
     compileSdk = 36
-    ndkVersion = "26.3.11579264"
+    val localNdk = file("C:/Android/ndk/26.3.11579264")
+    if (localNdk.exists()) {
+        ndkVersion = "26.3.11579264"
+    } else {
+        ndkVersion = "27.0.12077973"
+    }
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17

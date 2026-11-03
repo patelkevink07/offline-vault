@@ -54,7 +54,6 @@ class BackgroundSyncService {
     try {
       await _workmanager.initialize(
         backgroundSyncCallbackDispatcher,
-        isInDebugMode: kDebugMode,
       );
       await schedulePeriodicSync();
     } catch (e) {
@@ -74,7 +73,7 @@ class BackgroundSyncService {
           networkType: NetworkType.unmetered,
           requiresCharging: true,
         ),
-        existingWorkPolicy: ExistingWorkPolicy.keep,
+        existingWorkPolicy: ExistingPeriodicWorkPolicy.keep,
         backoffPolicy: BackoffPolicy.linear,
         backoffPolicyDelay: const Duration(minutes: 15),
       );
