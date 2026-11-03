@@ -639,6 +639,210 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Open Battery Settings'**
   String get openBatterySettings;
+
+  /// No description provided for @joinVault.
+  ///
+  /// In en, this message translates to:
+  /// **'Join Vault'**
+  String get joinVault;
+
+  /// No description provided for @enter4DigitCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the 4-digit code'**
+  String get enter4DigitCode;
+
+  /// No description provided for @scanQrCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan QR code'**
+  String get scanQrCode;
+
+  /// No description provided for @scanQrCodeSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan the code directly from another screen or device'**
+  String get scanQrCodeSubtitle;
+
+  /// No description provided for @stopScanner.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop Scanner'**
+  String get stopScanner;
+
+  /// No description provided for @invalidOrExpiredCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid or expired invite code.'**
+  String get invalidOrExpiredCode;
+
+  /// No description provided for @tooManyAttempts.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many failed attempts. Please try again in an hour.'**
+  String get tooManyAttempts;
+
+  /// No description provided for @trafficPaused.
+  ///
+  /// In en, this message translates to:
+  /// **'Joining groups is temporarily paused. Please try again later.'**
+  String get trafficPaused;
+
+  /// No description provided for @removedFromGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'You have been removed from this group.'**
+  String get removedFromGroup;
+
+  /// No description provided for @requestPendingApproval.
+  ///
+  /// In en, this message translates to:
+  /// **'Your join request is pending approval from the owner.'**
+  String get requestPendingApproval;
+
+  /// No description provided for @shareAndMembers.
+  ///
+  /// In en, this message translates to:
+  /// **'Share and members'**
+  String get shareAndMembers;
+
+  /// No description provided for @vaultCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Vault Code'**
+  String get vaultCode;
+
+  /// No description provided for @expiresInHours.
+  ///
+  /// In en, this message translates to:
+  /// **'Expires in {hours} h'**
+  String expiresInHours(int hours);
+
+  /// No description provided for @changeExpiry.
+  ///
+  /// In en, this message translates to:
+  /// **'Change Expiry'**
+  String get changeExpiry;
+
+  /// No description provided for @expiry1Hour.
+  ///
+  /// In en, this message translates to:
+  /// **'1 hour'**
+  String get expiry1Hour;
+
+  /// No description provided for @expiry24Hours.
+  ///
+  /// In en, this message translates to:
+  /// **'24 hours'**
+  String get expiry24Hours;
+
+  /// No description provided for @expiry7Days.
+  ///
+  /// In en, this message translates to:
+  /// **'7 days'**
+  String get expiry7Days;
+
+  /// No description provided for @approveMembersMyself.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve new members myself'**
+  String get approveMembersMyself;
+
+  /// No description provided for @rotateCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Rotate'**
+  String get rotateCode;
+
+  /// No description provided for @copyCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get copyCode;
+
+  /// No description provided for @shareCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get shareCode;
+
+  /// No description provided for @codeCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Code copied to clipboard'**
+  String get codeCopied;
+
+  /// No description provided for @members.
+  ///
+  /// In en, this message translates to:
+  /// **'Members'**
+  String get members;
+
+  /// No description provided for @joinedJustNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Joined just now'**
+  String get joinedJustNow;
+
+  /// No description provided for @roleOwner.
+  ///
+  /// In en, this message translates to:
+  /// **'Owner'**
+  String get roleOwner;
+
+  /// No description provided for @roleEditor.
+  ///
+  /// In en, this message translates to:
+  /// **'Editor'**
+  String get roleEditor;
+
+  /// No description provided for @roleViewer.
+  ///
+  /// In en, this message translates to:
+  /// **'Viewer'**
+  String get roleViewer;
+
+  /// No description provided for @removeMember.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get removeMember;
+
+  /// No description provided for @leaveGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave vault'**
+  String get leaveGroup;
+
+  /// No description provided for @leaveGroupConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to leave this vault? All downloaded files and thumbnails will be removed from your phone immediately.'**
+  String get leaveGroupConfirm;
+
+  /// No description provided for @removeMemberConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove {name} from this vault?'**
+  String removeMemberConfirm(String name);
+
+  /// No description provided for @approve.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve'**
+  String get approve;
+
+  /// No description provided for @decline.
+  ///
+  /// In en, this message translates to:
+  /// **'Decline'**
+  String get decline;
+
+  /// No description provided for @pendingMembers.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending Approval'**
+  String get pendingMembers;
 }
 
 class _AppLocalizationsDelegate

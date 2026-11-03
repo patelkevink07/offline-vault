@@ -315,4 +315,115 @@ class AppLocalizationsGu extends AppLocalizations {
 
   @override
   String get openBatterySettings => 'બૅટરી સેટિંગ્સ ખોલો';
+
+  @override
+  String get joinVault => 'વૉલ્ટમાં જોડાઓ';
+
+  @override
+  String get enter4DigitCode => '૪ અંકનો કોડ દાખલ કરો';
+
+  @override
+  String get scanQrCode => 'QR કોડ સ્કેન કરો';
+
+  @override
+  String get scanQrCodeSubtitle =>
+      'અન્ય સ્ક્રીન અથવા ડિવાઇસ પરથી સીધો કોડ સ્કેન કરો';
+
+  @override
+  String get stopScanner => 'સ્કેનર બંધ કરો';
+
+  @override
+  String get invalidOrExpiredCode => 'અમાન્ય અથવા સમાપ્ત થયેલ આમંત્રણ કોડ.';
+
+  @override
+  String get tooManyAttempts =>
+      'ઘણા બધા નિષ્ફળ પ્રયાસો. કૃપા કરીને એક કલાક પછી ફરી પ્રયાસ કરો.';
+
+  @override
+  String get trafficPaused =>
+      'વૉલ્ટમાં જોડાવાનું હાલમાં સ્થગિત છે. કૃપા કરીને થોડા સમય પછી ફરી પ્રયાસ કરો.';
+
+  @override
+  String get removedFromGroup => 'તમને આ વૉલ્ટમાંથી દૂર કરવામાં આવ્યા છે.';
+
+  @override
+  String get requestPendingApproval =>
+      'તમારી જોડાવાની વિનંતી માલિકની મંજૂરી માટે બાકી છે.';
+
+  @override
+  String get shareAndMembers => 'શેર અને સભ્યો';
+
+  @override
+  String get vaultCode => 'વૉલ્ટ કોડ';
+
+  @override
+  String expiresInHours(int hours) {
+    return '$hours કલાકમાં સમાપ્ત થાય છે';
+  }
+
+  @override
+  String get changeExpiry => 'સમાપ્તિ સમય બદલો';
+
+  @override
+  String get expiry1Hour => '૧ કલાક';
+
+  @override
+  String get expiry24Hours => '૨૪ કલાક';
+
+  @override
+  String get expiry7Days => '૭ દિવસ';
+
+  @override
+  String get approveMembersMyself => 'નવા સભ્યોને મારી જાતે મંજૂર કરો';
+
+  @override
+  String get rotateCode => 'નવો કોડ બનાવો';
+
+  @override
+  String get copyCode => 'કૉપિ કરો';
+
+  @override
+  String get shareCode => 'શેર કરો';
+
+  @override
+  String get codeCopied => 'કોડ ક્લિપબોર્ડ પર કૉપિ થયો';
+
+  @override
+  String get members => 'સભ્યો';
+
+  @override
+  String get joinedJustNow => 'હમણાં જ જોડાયા';
+
+  @override
+  String get roleOwner => 'માલિક';
+
+  @override
+  String get roleEditor => 'સંપાદક';
+
+  @override
+  String get roleViewer => 'દર્શક';
+
+  @override
+  String get removeMember => 'દૂર કરો';
+
+  @override
+  String get leaveGroup => 'વૉલ્ટ છોડો';
+
+  @override
+  String get leaveGroupConfirm =>
+      'શું તમે ખરેખર આ વૉલ્ટ છોડવા માંગો છો? બધી ડાઉનલોડ કરેલી ફાઇલો અને થંબનેલ્સ તરત જ તમારા ફોનમાંથી દૂર કરવામાં આવશે.';
+
+  @override
+  String removeMemberConfirm(String name) {
+    return 'આ વૉલ્ટમાંથી $name ને દૂર કરીએ?';
+  }
+
+  @override
+  String get approve => 'મંજૂર કરો';
+
+  @override
+  String get decline => 'અસ્વીકાર કરો';
+
+  @override
+  String get pendingMembers => 'મંજૂરી બાકી';
 }

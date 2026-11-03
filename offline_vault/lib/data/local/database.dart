@@ -160,7 +160,13 @@ class GroupsDao extends DatabaseAccessor<AppDatabase> with _$GroupsDaoMixin {
 
   /// Delete a group and cascade-delete its folders and files.
   Future<void> deleteGroup(String groupId) async {
-    await (delete(localGroups)..where((t) => t.id.equals(groupId))).go();
+    await db.transaction(() async {
+      await (delete(db.localFiles)..where((t) => t.groupId.equals(groupId))).go();
+      await (delete(db.localFolders)..where((t) => t.groupId.equals(groupId))).go();
+      await (delete(db.uploadQueue)..where((t) => t.groupId.equals(groupId))).go();
+      await (delete(db.deleteQueue)..where((t) => t.groupId.equals(groupId))).go();
+      await (delete(localGroups)..where((t) => t.id.equals(groupId))).go();
+    });
   }
 
   /// Update the sync cursor for a group using server updated_at and tiebreaker row id.

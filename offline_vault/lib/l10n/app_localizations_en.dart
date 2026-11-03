@@ -314,4 +314,115 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get openBatterySettings => 'Open Battery Settings';
+
+  @override
+  String get joinVault => 'Join Vault';
+
+  @override
+  String get enter4DigitCode => 'Enter the 4-digit code';
+
+  @override
+  String get scanQrCode => 'Scan QR code';
+
+  @override
+  String get scanQrCodeSubtitle =>
+      'Scan the code directly from another screen or device';
+
+  @override
+  String get stopScanner => 'Stop Scanner';
+
+  @override
+  String get invalidOrExpiredCode => 'Invalid or expired invite code.';
+
+  @override
+  String get tooManyAttempts =>
+      'Too many failed attempts. Please try again in an hour.';
+
+  @override
+  String get trafficPaused =>
+      'Joining groups is temporarily paused. Please try again later.';
+
+  @override
+  String get removedFromGroup => 'You have been removed from this group.';
+
+  @override
+  String get requestPendingApproval =>
+      'Your join request is pending approval from the owner.';
+
+  @override
+  String get shareAndMembers => 'Share and members';
+
+  @override
+  String get vaultCode => 'Vault Code';
+
+  @override
+  String expiresInHours(int hours) {
+    return 'Expires in $hours h';
+  }
+
+  @override
+  String get changeExpiry => 'Change Expiry';
+
+  @override
+  String get expiry1Hour => '1 hour';
+
+  @override
+  String get expiry24Hours => '24 hours';
+
+  @override
+  String get expiry7Days => '7 days';
+
+  @override
+  String get approveMembersMyself => 'Approve new members myself';
+
+  @override
+  String get rotateCode => 'Rotate';
+
+  @override
+  String get copyCode => 'Copy';
+
+  @override
+  String get shareCode => 'Share';
+
+  @override
+  String get codeCopied => 'Code copied to clipboard';
+
+  @override
+  String get members => 'Members';
+
+  @override
+  String get joinedJustNow => 'Joined just now';
+
+  @override
+  String get roleOwner => 'Owner';
+
+  @override
+  String get roleEditor => 'Editor';
+
+  @override
+  String get roleViewer => 'Viewer';
+
+  @override
+  String get removeMember => 'Remove';
+
+  @override
+  String get leaveGroup => 'Leave vault';
+
+  @override
+  String get leaveGroupConfirm =>
+      'Are you sure you want to leave this vault? All downloaded files and thumbnails will be removed from your phone immediately.';
+
+  @override
+  String removeMemberConfirm(String name) {
+    return 'Remove $name from this vault?';
+  }
+
+  @override
+  String get approve => 'Approve';
+
+  @override
+  String get decline => 'Decline';
+
+  @override
+  String get pendingMembers => 'Pending Approval';
 }

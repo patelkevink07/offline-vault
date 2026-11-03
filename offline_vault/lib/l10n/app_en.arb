@@ -131,5 +131,53 @@
   "batteryOptimizationSubtitle": "Allow background sync to keep your vault updated even when closed",
   "batteryOptimizationGuideTitle": "Disable Battery Optimization",
   "batteryOptimizationGuideContent": "Android may put vaultOFF to sleep when the app is closed, pausing automatic sync. To keep your vaults and files up to date in the background, set vaultOFF battery usage to Unrestricted.",
-  "openBatterySettings": "Open Battery Settings"
+  "openBatterySettings": "Open Battery Settings",
+  "joinVault": "Join Vault",
+  "enter4DigitCode": "Enter the 4-digit code",
+  "scanQrCode": "Scan QR code",
+  "scanQrCodeSubtitle": "Scan the code directly from another screen or device",
+  "stopScanner": "Stop Scanner",
+  "invalidOrExpiredCode": "Invalid or expired invite code.",
+  "tooManyAttempts": "Too many failed attempts. Please try again in an hour.",
+  "trafficPaused": "Joining groups is temporarily paused. Please try again later.",
+  "removedFromGroup": "You have been removed from this group.",
+  "requestPendingApproval": "Your join request is pending approval from the owner.",
+  "shareAndMembers": "Share and members",
+  "vaultCode": "Vault Code",
+  "expiresInHours": "Expires in {hours} h",
+  "@expiresInHours": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "changeExpiry": "Change Expiry",
+  "expiry1Hour": "1 hour",
+  "expiry24Hours": "24 hours",
+  "expiry7Days": "7 days",
+  "approveMembersMyself": "Approve new members myself",
+  "rotateCode": "Rotate",
+  "copyCode": "Copy",
+  "shareCode": "Share",
+  "codeCopied": "Code copied to clipboard",
+  "members": "Members",
+  "joinedJustNow": "Joined just now",
+  "roleOwner": "Owner",
+  "roleEditor": "Editor",
+  "roleViewer": "Viewer",
+  "removeMember": "Remove",
+  "leaveGroup": "Leave vault",
+  "leaveGroupConfirm": "Are you sure you want to leave this vault? All downloaded files and thumbnails will be removed from your phone immediately.",
+  "removeMemberConfirm": "Remove {name} from this vault?",
+  "@removeMemberConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "approve": "Approve",
+  "decline": "Decline",
+  "pendingMembers": "Pending Approval"
 }

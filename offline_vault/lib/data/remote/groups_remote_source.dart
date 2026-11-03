@@ -89,8 +89,84 @@ class GroupsRemoteSource {
         .select('group_id, role, status, groups(id, name, color, owner_id, created_at, updated_at)')
         .eq('user_id', userId)
         .eq('status', 'active');
+    return List<Map<String, dynamic>>.from(response as List);
+  }
 
-    return List<Map<String, dynamic>>.from(response);
+  /// Fetch all members for a group.
+  Future<List<Map<String, dynamic>>> fetchGroupMembers(String groupId) async {
+    final response = await _supabase
+        .from('group_members')
+        .select('group_id, user_id, role, status, joined_at, profiles(display_name, email, avatar_url)')
+        .eq('group_id', groupId)
+        .neq('status', 'removed')
+        .order('joined_at', ascending: true);
+    return List<Map<String, dynamic>>.from(response as List);
+  }
+
+  /// Change member role (owner only)
+  Future<void> updateMemberRole({
+    required String groupId,
+    required String userId,
+    required String role,
+  }) async {
+    await _supabase
+        .from('group_members')
+        .update({'role': role})
+        .eq('group_id', groupId)
+        .eq('user_id', userId);
+  }
+
+  /// Remove member from group (owner only)
+  Future<void> removeMember({
+    required String groupId,
+    required String userId,
+  }) async {
+    await _supabase
+        .from('group_members')
+        .update({'status': 'removed'})
+        .eq('group_id', groupId)
+        .eq('user_id', userId);
+  }
+
+  /// Leave group (current user)
+  Future<void> leaveGroup({
+    required String groupId,
+  }) async {
+    final userId = _supabase.auth.currentUser?.id;
+    if (userId == null) return;
+    await _supabase
+        .from('group_members')
+        .update({'status': 'removed'})
+        .eq('group_id', groupId)
+        .eq('user_id', userId);
+  }
+
+  /// Approve pending member (owner only)
+  Future<void> approveMember({
+    required String groupId,
+    required String userId,
+  }) async {
+    await _supabase.rpc(
+      'approve_member',
+      params: {
+        'p_group_id': groupId,
+        'p_user_id': userId,
+      },
+    );
+  }
+
+  /// Decline pending member (owner only)
+  Future<void> declineMember({
+    required String groupId,
+    required String userId,
+  }) async {
+    await _supabase.rpc(
+      'decline_member',
+      params: {
+        'p_group_id': groupId,
+        'p_user_id': userId,
+      },
+    );
   }
 
   /// Pull metadata for folders since cursor, ordered by (updated_at, id) with pagination

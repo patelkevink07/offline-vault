@@ -96,6 +96,17 @@ class FileStorageService {
     } catch (_) {}
   }
 
+  /// Wipe all files and thumbnails for a group from the device.
+  Future<void> wipeGroupStorage(String groupId) async {
+    try {
+      final root = await appDir;
+      final dir = Directory(p.join(root.path, 'vault', groupId));
+      if (dir.existsSync()) {
+        await dir.delete(recursive: true);
+      }
+    } catch (_) {}
+  }
+
   /// Create a temporary decrypted file (e.g. for PDF viewer), returning the path.
   Future<String> createTempDecryptedFile({
     required String sourceEncryptedPath,

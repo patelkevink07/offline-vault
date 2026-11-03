@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../core/storage/file_storage_service.dart';
 import '../../core/utils/logger.dart';
 import '../local/database.dart';
 import '../remote/groups_remote_source.dart';
@@ -17,7 +18,13 @@ final groupsRepositoryProvider = Provider<GroupsRepository>((ref) {
   final db = ref.watch(databaseProvider);
   final remote = ref.watch(groupsRemoteSourceProvider);
   final supabase = ref.watch(supabaseClientProvider);
-  return GroupsRepository(db: db, remote: remote, supabase: supabase);
+  final storage = ref.watch(fileStorageProvider);
+  return GroupsRepository(
+    db: db,
+    remote: remote,
+    supabase: supabase,
+    storage: storage,
+  );
 });
 
 class GroupsRepository {
@@ -25,13 +32,16 @@ class GroupsRepository {
     required AppDatabase db,
     required GroupsRemoteSource remote,
     required SupabaseClient supabase,
+    required FileStorageService storage,
   })  : _db = db,
         _remote = remote,
-        _supabase = supabase;
+        _supabase = supabase,
+        _storage = storage;
 
   final AppDatabase _db;
   final GroupsRemoteSource _remote;
   final SupabaseClient _supabase;
+  final FileStorageService _storage;
 
   /// Watch local groups from Drift DB (Local-first)
   Stream<List<LocalGroup>> watchGroups() => _db.groupsDao.watchAll();
@@ -148,5 +158,84 @@ class GroupsRepository {
         'myRole': 'editor',
       },
     };
+  }
+
+  /// List all members for a group.
+  Future<List<Map<String, dynamic>>> fetchMembers(String groupId) async {
+    try {
+      return await _remote.fetchGroupMembers(groupId);
+    } catch (e) {
+      VaultLogger.w('Failed to fetch group members: $e');
+      return [];
+    }
+  }
+
+  /// Change a member's role (owner only).
+  Future<void> updateMemberRole({
+    required String groupId,
+    required String userId,
+    required String role,
+  }) async {
+    await _remote.updateMemberRole(
+      groupId: groupId,
+      userId: userId,
+      role: role,
+    );
+    // If updating own role, reflect locally
+    if (userId == _supabase.auth.currentUser?.id) {
+      final current = await _db.groupsDao.getById(groupId);
+      if (current != null) {
+        await _db.groupsDao.upsert(
+          current.toCompanion(true).copyWith(myRole: Value(role)),
+        );
+      }
+    }
+  }
+
+  /// Remove a member from the group (owner only).
+  Future<void> removeMember({
+    required String groupId,
+    required String userId,
+  }) async {
+    await _remote.removeMember(groupId: groupId, userId: userId);
+    // If removing self, wipe local group
+    if (userId == _supabase.auth.currentUser?.id) {
+      await purgeLocalGroup(groupId);
+    }
+  }
+
+  /// Leave group (non-owner). Wipes local files and group data immediately.
+  Future<void> leaveGroup(String groupId) async {
+    try {
+      await _remote.leaveGroup(groupId: groupId);
+    } catch (e) {
+      VaultLogger.w('Remote leaveGroup error (wiping local data anyway): $e');
+    }
+    await purgeLocalGroup(groupId);
+  }
+
+  /// Wipes all files, thumbnails, and database records for a group from this device.
+  Future<void> purgeLocalGroup(String groupId) async {
+    // 1. Wipe storage files and thumbnails on disk
+    await _storage.wipeGroupStorage(groupId);
+
+    // 2. Cascade delete from local database
+    await _db.groupsDao.deleteGroup(groupId);
+  }
+
+  /// Owner approves pending member.
+  Future<void> approveMember({
+    required String groupId,
+    required String userId,
+  }) async {
+    await _remote.approveMember(groupId: groupId, userId: userId);
+  }
+
+  /// Owner declines pending member.
+  Future<void> declineMember({
+    required String groupId,
+    required String userId,
+  }) async {
+    await _remote.declineMember(groupId: groupId, userId: userId);
   }
 }
