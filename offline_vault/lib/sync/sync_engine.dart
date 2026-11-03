@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 
@@ -101,6 +102,15 @@ class SyncEngine {
         return true;
       }
 
+      // One-time migration: reset all existing cursors to null once so next sync does a safe re-pull
+      final prefs = await SharedPreferences.getInstance();
+      final cursorResetDone = prefs.getBool('sync_cursor_v2_reset_done') ?? false;
+      if (!cursorResetDone) {
+        await _db.groupsDao.resetAllSyncCursors();
+        await prefs.setBool('sync_cursor_v2_reset_done', true);
+        VaultLogger.i('Phase 2 migration: reset existing sync cursors to null once.');
+      }
+
       // 3. Pull metadata for all active cloud groups
       final userGroups = await _remote.fetchUserGroups();
 
@@ -145,75 +155,139 @@ class SyncEngine {
     }
   }
 
-  /// Sync folders, files, and thumbnails for a specific group
+  /// Sync folders, files, and thumbnails for a specific group using server updated_at cursor
   Future<void> syncGroup(String groupId) async {
     final currentUser = _supabase.auth.currentUser;
     if (currentUser == null) return;
 
     try {
-      // 1. Pull folders
-      final remoteFolders = await _remote.pullFolders(groupId: groupId);
-      for (final folder in remoteFolders) {
-        final isDeleted = folder['deleted'] as bool? ?? false;
-        if (isDeleted) {
-          await _db.foldersDao.deleteById(folder['id'] as String);
-        } else {
-          await _db.foldersDao.upsert(
-            LocalFoldersCompanion.insert(
-              id: folder['id'] as String,
-              groupId: groupId,
-              parentId: Value(folder['parent_id'] as String?),
-              name: folder['name'] as String,
-              updatedAt: DateTime.parse(folder['updated_at'] as String),
-            ),
-          );
+      // 0. Read current group cursor from local SQLite
+      final localGroup = await _db.groupsDao.getById(groupId);
+      final currentCursor = localGroup?.lastSyncCursor;
+      final currentCursorId = localGroup?.lastSyncCursorId;
+
+      // 1. Pull folders in pages of 200 ordered by (updated_at, id)
+      final remoteFolders = await _remote.fetchAllFolders(
+        groupId: groupId,
+        sinceCursor: currentCursor,
+      );
+
+      // 2. Pull files in pages of 200 ordered by (updated_at, id)
+      final remoteFiles = await _remote.fetchAllFiles(
+        groupId: groupId,
+        sinceCursor: currentCursor,
+      );
+
+      // 3. Track maximum server (updated_at, id) actually received across all rows
+      DateTime? maxServerUpdatedAt = currentCursor;
+      String? maxServerId = currentCursorId;
+
+      void trackMax(String? updatedAtStr, String? id) {
+        if (updatedAtStr == null || id == null) return;
+        final serverTime = DateTime.parse(updatedAtStr);
+        if (maxServerUpdatedAt == null || serverTime.isAfter(maxServerUpdatedAt!)) {
+          maxServerUpdatedAt = serverTime;
+          maxServerId = id;
+        } else if (serverTime.isAtSameMomentAs(maxServerUpdatedAt!)) {
+          if (maxServerId == null || id.compareTo(maxServerId!) > 0) {
+            maxServerUpdatedAt = serverTime;
+            maxServerId = id;
+          }
         }
       }
 
-      // 2. Pull files
-      final remoteFiles = await _remote.pullFiles(groupId: groupId);
+      for (final folder in remoteFolders) {
+        trackMax(folder['updated_at'] as String?, folder['id'] as String?);
+      }
+      for (final rf in remoteFiles) {
+        trackMax(rf['updated_at'] as String?, rf['id'] as String?);
+      }
+
+      // 4. Apply pages as idempotent upserts and soft-deletes inside ONE Drift transaction
+      await _db.transaction(() async {
+        // Apply folders
+        for (final folder in remoteFolders) {
+          final isDeleted = folder['deleted'] as bool? ?? false;
+          final folderId = folder['id'] as String;
+          if (isDeleted) {
+            await _db.foldersDao.deleteById(folderId);
+          } else {
+            await _db.foldersDao.upsert(
+              LocalFoldersCompanion.insert(
+                id: folderId,
+                groupId: groupId,
+                parentId: Value(folder['parent_id'] as String?),
+                name: folder['name'] as String,
+                updatedAt: DateTime.parse(folder['updated_at'] as String),
+              ),
+            );
+          }
+        }
+
+        // Apply files
+        for (final rf in remoteFiles) {
+          final isDeleted = rf['deleted'] as bool? ?? false;
+          final fileId = rf['id'] as String;
+
+          if (isDeleted) {
+            await _db.filesDao.deleteById(fileId);
+          } else {
+            final existing = await _db.filesDao.getById(fileId);
+            await _db.filesDao.upsert(
+              LocalFilesCompanion.insert(
+                id: fileId,
+                groupId: groupId,
+                folderId: Value(rf['folder_id'] as String?),
+                name: rf['name'] as String,
+                note: Value(rf['note'] as String?),
+                mime: rf['mime_type'] as String,
+                size: (rf['size_bytes'] as num).toInt(),
+                checksum: rf['checksum'] as String,
+                width: Value(rf['width'] as int?),
+                height: Value(rf['height'] as int?),
+                thumbState: Value(existing?.thumbState ?? 'queued'),
+                originalState: Value(existing?.originalState ?? 'remote'),
+                localThumbPath: Value(existing?.localThumbPath),
+                localOriginalPath: Value(existing?.localOriginalPath),
+                updatedAt: DateTime.parse(rf['updated_at'] as String),
+              ),
+            );
+          }
+        }
+      });
+
+      // 5. Clean up local files on disk for soft-deleted files
       for (final rf in remoteFiles) {
         final isDeleted = rf['deleted'] as bool? ?? false;
-        final fileId = rf['id'] as String;
-
         if (isDeleted) {
-          await _db.filesDao.deleteById(fileId);
+          final fileId = rf['id'] as String;
           final localOriginal = '${await _storage.getOriginalsPath(groupId)}/$fileId';
           final localThumb = '${await _storage.getThumbsPath(groupId)}/$fileId.webp';
           await _storage.deleteFile(localOriginal);
           await _storage.deleteFile(localThumb);
-        } else {
-          final existing = await _db.filesDao.getById(fileId);
-          await _db.filesDao.upsert(
-            LocalFilesCompanion.insert(
-              id: fileId,
-              groupId: groupId,
-              folderId: Value(rf['folder_id'] as String?),
-              name: rf['name'] as String,
-              note: Value(rf['note'] as String?),
-              mime: rf['mime_type'] as String,
-              size: (rf['size_bytes'] as num).toInt(),
-              checksum: rf['checksum'] as String,
-              width: Value(rf['width'] as int?),
-              height: Value(rf['height'] as int?),
-              thumbState: Value(existing?.thumbState ?? 'queued'),
-              originalState: Value(existing?.originalState ?? 'remote'),
-              localThumbPath: Value(existing?.localThumbPath),
-              localOriginalPath: Value(existing?.localOriginalPath),
-              updatedAt: DateTime.parse(rf['updated_at'] as String),
-            ),
-          );
         }
       }
 
-      // 3. Download missing thumbnails & originals for this group
-      final filesNeedingDownload = await (_db.select(_db.localFiles)
-            ..where((t) =>
-                t.groupId.equals(groupId) &
-                (t.originalState.equals('remote') |
-                    t.originalState.equals('queued') |
-                    t.localOriginalPath.isNull()),))
-          .get();
+      // 6. Update the cursor only AFTER that transaction commits
+      if (maxServerUpdatedAt != null &&
+          (maxServerUpdatedAt != currentCursor || maxServerId != currentCursorId)) {
+        await _db.groupsDao.updateSyncCursor(
+          groupId,
+          maxServerUpdatedAt!,
+          cursorId: maxServerId,
+        );
+      }
+
+      // 7. Download missing thumbnails & originals for this group
+      final query = _db.select(_db.localFiles)
+        ..where(
+          (t) =>
+              t.groupId.equals(groupId) &
+              (t.originalState.equals('remote') |
+                  t.originalState.equals('queued') |
+                  t.localOriginalPath.isNull()),
+        );
+      final filesNeedingDownload = await query.get();
 
       for (final file in filesNeedingDownload) {
         await downloadFile(file);

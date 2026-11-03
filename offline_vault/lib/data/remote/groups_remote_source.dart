@@ -93,10 +93,11 @@ class GroupsRemoteSource {
     return List<Map<String, dynamic>>.from(response);
   }
 
-  /// Pull metadata for folders since cursor
+  /// Pull metadata for folders since cursor, ordered by (updated_at, id) with pagination
   Future<List<Map<String, dynamic>>> pullFolders({
     required String groupId,
     DateTime? sinceCursor,
+    int offset = 0,
     int limit = 200,
   }) async {
     var query = _supabase
@@ -109,14 +110,40 @@ class GroupsRemoteSource {
       query = query.gt('updated_at', bufferCursor.toIso8601String());
     }
 
-    final response = await query.order('updated_at').limit(limit);
+    final response = await query
+        .order('updated_at', ascending: true)
+        .order('id', ascending: true)
+        .range(offset, offset + limit - 1);
     return List<Map<String, dynamic>>.from(response);
   }
 
-  /// Pull metadata for files since cursor
+  /// Fetch all folders for a group across pages of 200
+  Future<List<Map<String, dynamic>>> fetchAllFolders({
+    required String groupId,
+    DateTime? sinceCursor,
+    int pageSize = 200,
+  }) async {
+    final allRows = <Map<String, dynamic>>[];
+    var offset = 0;
+    while (true) {
+      final page = await pullFolders(
+        groupId: groupId,
+        sinceCursor: sinceCursor,
+        offset: offset,
+        limit: pageSize,
+      );
+      allRows.addAll(page);
+      if (page.length < pageSize) break;
+      offset += pageSize;
+    }
+    return allRows;
+  }
+
+  /// Pull metadata for files since cursor, ordered by (updated_at, id) with pagination
   Future<List<Map<String, dynamic>>> pullFiles({
     required String groupId,
     DateTime? sinceCursor,
+    int offset = 0,
     int limit = 200,
   }) async {
     var query = _supabase
@@ -129,8 +156,33 @@ class GroupsRemoteSource {
       query = query.gt('updated_at', bufferCursor.toIso8601String());
     }
 
-    final response = await query.order('updated_at').limit(limit);
+    final response = await query
+        .order('updated_at', ascending: true)
+        .order('id', ascending: true)
+        .range(offset, offset + limit - 1);
     return List<Map<String, dynamic>>.from(response);
+  }
+
+  /// Fetch all files for a group across pages of 200
+  Future<List<Map<String, dynamic>>> fetchAllFiles({
+    required String groupId,
+    DateTime? sinceCursor,
+    int pageSize = 200,
+  }) async {
+    final allRows = <Map<String, dynamic>>[];
+    var offset = 0;
+    while (true) {
+      final page = await pullFiles(
+        groupId: groupId,
+        sinceCursor: sinceCursor,
+        offset: offset,
+        limit: pageSize,
+      );
+      allRows.addAll(page);
+      if (page.length < pageSize) break;
+      offset += pageSize;
+    }
+    return allRows;
   }
 
   /// Request short-lived signed URLs for a batch of storage paths.

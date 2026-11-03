@@ -126,6 +126,13 @@ void main() {
     });
 
     test('UploadQueue persists custom named items and updates status', () async {
+      await db.groupsDao.upsert(
+        LocalGroupsCompanion.insert(
+          id: 'vault-1',
+          name: 'My Vault',
+        ),
+      );
+
       await db.uploadQueueDao.enqueue(
         UploadQueueCompanion.insert(
           id: 'queue-1',

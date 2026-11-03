@@ -19,6 +19,7 @@ class LocalGroups extends Table {
   TextColumn get color => text().withDefault(const Constant('#0F5C5A'))();
   TextColumn get myRole => text().withDefault(const Constant('viewer'))();
   DateTimeColumn get lastSyncCursor => dateTime().nullable()();
+  TextColumn get lastSyncCursorId => text().nullable()();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -141,10 +142,24 @@ class GroupsDao extends DatabaseAccessor<AppDatabase> with _$GroupsDaoMixin {
     await (delete(localGroups)..where((t) => t.id.equals(groupId))).go();
   }
 
-  /// Update the sync cursor for a group.
-  Future<void> updateSyncCursor(String groupId, DateTime cursor) {
-    return (update(localGroups)..where((t) => t.id.equals(groupId)))
-        .write(LocalGroupsCompanion(lastSyncCursor: Value(cursor)));
+  /// Update the sync cursor for a group using server updated_at and tiebreaker row id.
+  Future<void> updateSyncCursor(String groupId, DateTime cursor, {String? cursorId}) {
+    return (update(localGroups)..where((t) => t.id.equals(groupId))).write(
+      LocalGroupsCompanion(
+        lastSyncCursor: Value(cursor),
+        lastSyncCursorId: Value(cursorId),
+      ),
+    );
+  }
+
+  /// Reset all sync cursors to null (one-time migration / safe re-pull).
+  Future<void> resetAllSyncCursors() {
+    return update(localGroups).write(
+      const LocalGroupsCompanion(
+        lastSyncCursor: Value(null),
+        lastSyncCursorId: Value(null),
+      ),
+    );
   }
 }
 
@@ -537,7 +552,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.e);
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration {
@@ -567,6 +582,15 @@ class AppDatabase extends _$AppDatabase {
           'INSERT INTO files_fts(rowid, name, note) VALUES (new.rowid, new.name, new.note); '
           'END',
         );
+      },
+      onUpgrade: (Migrator m, int from, int to) async {
+        if (from < 2) {
+          await m.addColumn(localGroups, localGroups.lastSyncCursorId);
+          await customStatement('UPDATE local_groups SET last_sync_cursor = NULL, last_sync_cursor_id = NULL;');
+        }
+      },
+      beforeOpen: (details) async {
+        await customStatement('PRAGMA foreign_keys = ON');
       },
     );
   }
