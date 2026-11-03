@@ -84,5 +84,47 @@
   "uploadPending": "अपलोड बाकी है",
   "syncFailed": "सिंक विफल",
   "networkErrorMessage": "अपना इंटरनेट कनेक्शन जाँचें और पुनः प्रयास करें।",
-  "unknownError": "कुछ अनपेक्षित हुआ। कृपया पुनः प्रयास करें।"
+  "unknownError": "कुछ अनपेक्षित हुआ। कृपया पुनः प्रयास करें।",
+  "settingsAppLockTitle": "ऐप लॉक और पिन",
+  "settingsAppLockSubtitleSet": "पिन सेट है",
+  "settingsAppLockSubtitleNotSet": "कोई पिन सेट नहीं है",
+  "settingsSetPin": "पिन सेट करें",
+  "settingsChangePin": "पिन बदलें",
+  "settingsRemovePin": "पिन हटाएं",
+  "pinDialogTitleSet": "पिन सेट करें",
+  "pinDialogTitleChange": "पिन बदलें",
+  "pinDialogTitleRemove": "पिन हटाएं",
+  "pinRecommendation": "हम 6-अंकों के पिन की सलाह देते हैं (4 से 8 अंक मान्य हैं)",
+  "enterPin": "पिन दर्ज करें",
+  "enterCurrentPin": "वर्तमान पिन दर्ज करें",
+  "enterNewPin": "नया पिन दर्ज करें",
+  "confirmNewPin": "नए पिन की पुष्टि करें",
+  "pinMismatch": "पिन मेल नहीं खाते",
+  "pinLengthError": "पिन 4 से 8 अंकों के बीच होना चाहिए",
+  "pinIncorrect": "गलत पिन। कृपया पुनः प्रयास करें।",
+  "pinLockoutMessage": "बहुत सारे असफल प्रयास। {seconds} सेकंड में पुनः प्रयास करें",
+  "@pinLockoutMessage": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "biometricPrompt": "vaultOFF अनलॉक करें",
+  "biometricsEnabled": "बायोमेट्रिक अनलॉक",
+  "biometricsSubtitle": "अनलॉक करने के लिए फ़िंगरप्रिंट या चेहरे का उपयोग करें",
+  "unlock": "अनलॉक करें",
+  "savePin": "पिन सहेजें",
+  "syncAndNetwork": "सिंक और नेटवर्क",
+  "syncWifiOnly": "केवल वाई-फ़ाई पर सिंक करें",
+  "syncWifiOnlySubtitle": "स्वचालित बैकग्राउंड सिंक के लिए मोबाइल डेटा के उपयोग को रोकें",
+  "privacyAndSecurity": "गोपनीयता और सुरक्षा",
+  "blockScreenshots": "स्क्रीनशॉट ब्लॉक करें",
+  "blockScreenshotsSubtitle": "स्क्रीन कैप्चर रोकें और ऐप स्विचर में सामग्री छिपाएं",
+  "storage": "स्टोरेज",
+  "freeUpSpace": "स्थान खाली करें",
+  "freeUpSpaceSubtitle": "थंबनेल को ऑफ़लाइन रखते हुए मूल डाउनलोड हटाता है",
+  "spaceCleared": "स्थान खाली हो गया। थंबनेल सुरक्षित हैं।",
+  "language": "भाषा",
+  "account": "खाता"
 }

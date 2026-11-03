@@ -186,4 +186,116 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get unknownError => 'कुछ अनपेक्षित हुआ। कृपया पुनः प्रयास करें।';
+
+  @override
+  String get settingsAppLockTitle => 'ऐप लॉक और पिन';
+
+  @override
+  String get settingsAppLockSubtitleSet => 'पिन सेट है';
+
+  @override
+  String get settingsAppLockSubtitleNotSet => 'कोई पिन सेट नहीं है';
+
+  @override
+  String get settingsSetPin => 'पिन सेट करें';
+
+  @override
+  String get settingsChangePin => 'पिन बदलें';
+
+  @override
+  String get settingsRemovePin => 'पिन हटाएं';
+
+  @override
+  String get pinDialogTitleSet => 'पिन सेट करें';
+
+  @override
+  String get pinDialogTitleChange => 'पिन बदलें';
+
+  @override
+  String get pinDialogTitleRemove => 'पिन हटाएं';
+
+  @override
+  String get pinRecommendation =>
+      'हम 6-अंकों के पिन की सलाह देते हैं (4 से 8 अंक मान्य हैं)';
+
+  @override
+  String get enterPin => 'पिन दर्ज करें';
+
+  @override
+  String get enterCurrentPin => 'वर्तमान पिन दर्ज करें';
+
+  @override
+  String get enterNewPin => 'नया पिन दर्ज करें';
+
+  @override
+  String get confirmNewPin => 'नए पिन की पुष्टि करें';
+
+  @override
+  String get pinMismatch => 'पिन मेल नहीं खाते';
+
+  @override
+  String get pinLengthError => 'पिन 4 से 8 अंकों के बीच होना चाहिए';
+
+  @override
+  String get pinIncorrect => 'गलत पिन। कृपया पुनः प्रयास करें।';
+
+  @override
+  String pinLockoutMessage(int seconds) {
+    return 'बहुत सारे असफल प्रयास। $seconds सेकंड में पुनः प्रयास करें';
+  }
+
+  @override
+  String get biometricPrompt => 'vaultOFF अनलॉक करें';
+
+  @override
+  String get biometricsEnabled => 'बायोमेट्रिक अनलॉक';
+
+  @override
+  String get biometricsSubtitle =>
+      'अनलॉक करने के लिए फ़िंगरप्रिंट या चेहरे का उपयोग करें';
+
+  @override
+  String get unlock => 'अनलॉक करें';
+
+  @override
+  String get savePin => 'पिन सहेजें';
+
+  @override
+  String get syncAndNetwork => 'सिंक और नेटवर्क';
+
+  @override
+  String get syncWifiOnly => 'केवल वाई-फ़ाई पर सिंक करें';
+
+  @override
+  String get syncWifiOnlySubtitle =>
+      'स्वचालित बैकग्राउंड सिंक के लिए मोबाइल डेटा के उपयोग को रोकें';
+
+  @override
+  String get privacyAndSecurity => 'गोपनीयता और सुरक्षा';
+
+  @override
+  String get blockScreenshots => 'स्क्रीनशॉट ब्लॉक करें';
+
+  @override
+  String get blockScreenshotsSubtitle =>
+      'स्क्रीन कैप्चर रोकें और ऐप स्विचर में सामग्री छिपाएं';
+
+  @override
+  String get storage => 'स्टोरेज';
+
+  @override
+  String get freeUpSpace => 'स्थान खाली करें';
+
+  @override
+  String get freeUpSpaceSubtitle =>
+      'थंबनेल को ऑफ़लाइन रखते हुए मूल डाउनलोड हटाता है';
+
+  @override
+  String get spaceCleared => 'स्थान खाली हो गया। थंबनेल सुरक्षित हैं।';
+
+  @override
+  String get language => 'भाषा';
+
+  @override
+  String get account => 'खाता';
 }

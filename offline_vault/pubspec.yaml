@@ -52,7 +52,6 @@ dependencies:
   pdfx: ^2.6.0
 
   # UI, Icons, Typography & QR
-  google_fonts: ^6.2.1
   qr_flutter: ^4.1.0
   mobile_scanner: ^5.1.1
   shared_preferences: ^2.2.3
@@ -71,3 +70,13 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   generate: true
+  fonts:
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter.ttf
+    - family: NotoSansGujarati
+      fonts:
+        - asset: assets/fonts/NotoSansGujarati.ttf
+    - family: NotoSansDevanagari
+      fonts:
+        - asset: assets/fonts/NotoSansDevanagari.ttf

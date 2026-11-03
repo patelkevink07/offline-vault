@@ -4,8 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pdfx/pdfx.dart';
 
-import '../../../core/crypto/crypto_service.dart';
-import '../../../core/crypto/key_manager.dart';
+
 import '../../../core/storage/file_storage_service.dart';
 import '../../../data/local/database.dart';
 import '../../../sync/sync_engine.dart';
@@ -85,9 +84,7 @@ class _FileViewerScreenState extends ConsumerState<FileViewerScreen> {
     }
 
     try {
-      final keyManager = KeyManager();
-      final crypto = CryptoService(keyManager: keyManager);
-      final storage = FileStorageService(cryptoService: crypto);
+      final storage = ref.read(fileStorageProvider);
 
       if (file!.mime.startsWith('image/')) {
         final decrypted = await storage.readDecryptedFile(path);

@@ -399,6 +399,216 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Something unexpected happened. Please try again.'**
   String get unknownError;
+
+  /// No description provided for @settingsAppLockTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'App Lock & PIN'**
+  String get settingsAppLockTitle;
+
+  /// No description provided for @settingsAppLockSubtitleSet.
+  ///
+  /// In en, this message translates to:
+  /// **'PIN configured'**
+  String get settingsAppLockSubtitleSet;
+
+  /// No description provided for @settingsAppLockSubtitleNotSet.
+  ///
+  /// In en, this message translates to:
+  /// **'No PIN configured'**
+  String get settingsAppLockSubtitleNotSet;
+
+  /// No description provided for @settingsSetPin.
+  ///
+  /// In en, this message translates to:
+  /// **'Set PIN'**
+  String get settingsSetPin;
+
+  /// No description provided for @settingsChangePin.
+  ///
+  /// In en, this message translates to:
+  /// **'Change PIN'**
+  String get settingsChangePin;
+
+  /// No description provided for @settingsRemovePin.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove PIN'**
+  String get settingsRemovePin;
+
+  /// No description provided for @pinDialogTitleSet.
+  ///
+  /// In en, this message translates to:
+  /// **'Set PIN'**
+  String get pinDialogTitleSet;
+
+  /// No description provided for @pinDialogTitleChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Change PIN'**
+  String get pinDialogTitleChange;
+
+  /// No description provided for @pinDialogTitleRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove PIN'**
+  String get pinDialogTitleRemove;
+
+  /// No description provided for @pinRecommendation.
+  ///
+  /// In en, this message translates to:
+  /// **'We recommend a 6-digit PIN (4 to 8 digits allowed)'**
+  String get pinRecommendation;
+
+  /// No description provided for @enterPin.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter PIN'**
+  String get enterPin;
+
+  /// No description provided for @enterCurrentPin.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter current PIN'**
+  String get enterCurrentPin;
+
+  /// No description provided for @enterNewPin.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter new PIN'**
+  String get enterNewPin;
+
+  /// No description provided for @confirmNewPin.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm new PIN'**
+  String get confirmNewPin;
+
+  /// No description provided for @pinMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'PINs do not match'**
+  String get pinMismatch;
+
+  /// No description provided for @pinLengthError.
+  ///
+  /// In en, this message translates to:
+  /// **'PIN must be between 4 and 8 digits'**
+  String get pinLengthError;
+
+  /// No description provided for @pinIncorrect.
+  ///
+  /// In en, this message translates to:
+  /// **'Incorrect PIN. Please try again.'**
+  String get pinIncorrect;
+
+  /// No description provided for @pinLockoutMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many failed attempts. Try again in {seconds}s'**
+  String pinLockoutMessage(int seconds);
+
+  /// No description provided for @biometricPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock vaultOFF'**
+  String get biometricPrompt;
+
+  /// No description provided for @biometricsEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Biometric unlock'**
+  String get biometricsEnabled;
+
+  /// No description provided for @biometricsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Use fingerprint or face to unlock'**
+  String get biometricsSubtitle;
+
+  /// No description provided for @unlock.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock'**
+  String get unlock;
+
+  /// No description provided for @savePin.
+  ///
+  /// In en, this message translates to:
+  /// **'Save PIN'**
+  String get savePin;
+
+  /// No description provided for @syncAndNetwork.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync & Network'**
+  String get syncAndNetwork;
+
+  /// No description provided for @syncWifiOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync on Wi-Fi only'**
+  String get syncWifiOnly;
+
+  /// No description provided for @syncWifiOnlySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Prevent using mobile data for automatic background sync'**
+  String get syncWifiOnlySubtitle;
+
+  /// No description provided for @privacyAndSecurity.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy & Security'**
+  String get privacyAndSecurity;
+
+  /// No description provided for @blockScreenshots.
+  ///
+  /// In en, this message translates to:
+  /// **'Block screenshots'**
+  String get blockScreenshots;
+
+  /// No description provided for @blockScreenshotsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Prevent screen captures and hide content in app switcher'**
+  String get blockScreenshotsSubtitle;
+
+  /// No description provided for @storage.
+  ///
+  /// In en, this message translates to:
+  /// **'Storage'**
+  String get storage;
+
+  /// No description provided for @freeUpSpace.
+  ///
+  /// In en, this message translates to:
+  /// **'Free up space'**
+  String get freeUpSpace;
+
+  /// No description provided for @freeUpSpaceSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Removes original downloads while keeping thumbnails offline'**
+  String get freeUpSpaceSubtitle;
+
+  /// No description provided for @spaceCleared.
+  ///
+  /// In en, this message translates to:
+  /// **'Space cleared. Thumbnails retained.'**
+  String get spaceCleared;
+
+  /// No description provided for @language.
+  ///
+  /// In en, this message translates to:
+  /// **'Language'**
+  String get language;
+
+  /// No description provided for @account.
+  ///
+  /// In en, this message translates to:
+  /// **'Account'**
+  String get account;
 }
 
 class _AppLocalizationsDelegate

@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../core/security/app_lock_provider.dart';
 import '../data/repositories/auth_repository.dart';
 import '../features/auth/presentation/onboarding_screen.dart';
 import '../features/auth/presentation/sign_in_screen.dart';
@@ -9,6 +10,7 @@ import '../features/gallery/presentation/gallery_screen.dart';
 import '../features/groups/presentation/groups_home_screen.dart';
 import '../features/groups/presentation/join_group_screen.dart';
 import '../features/members/presentation/members_screen.dart';
+import '../features/security/presentation/app_lock_screen.dart';
 import '../features/settings/presentation/settings_screen.dart';
 import '../features/sync_centre/presentation/sync_centre_screen.dart';
 import '../features/upload/presentation/upload_screen.dart';
@@ -16,12 +18,22 @@ import '../features/viewer/presentation/viewer_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   final authRepo = ref.watch(authRepositoryProvider);
+  final lockState = ref.watch(appLockProvider);
 
   return GoRouter(
     initialLocation: '/',
     redirect: (context, state) async {
+      // 1. Guard with App Lock if enabled and locked
+      if (lockState.isLocked) {
+        return state.matchedLocation == '/lock' ? null : '/lock';
+      }
+      if (!lockState.isLocked && state.matchedLocation == '/lock') {
+        return '/';
+      }
+
       final prefs = await SharedPreferences.getInstance();
-      final hasCompletedOnboarding = prefs.getBool('onboarding_completed') ?? false;
+      final hasCompletedOnboarding =
+          prefs.getBool('onboarding_completed') ?? false;
 
       final isLoggingIn = state.matchedLocation == '/sign-in';
       final isOnboarding = state.matchedLocation == '/onboarding';
@@ -48,6 +60,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       return null;
     },
     routes: [
+      GoRoute(
+        path: '/lock',
+        builder: (context, state) => const AppLockScreen(),
+      ),
       GoRoute(
         path: '/onboarding',
         builder: (context, state) => const OnboardingScreen(),

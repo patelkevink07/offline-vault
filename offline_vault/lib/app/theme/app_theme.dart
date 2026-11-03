@@ -4,45 +4,64 @@ import 'app_colors.dart';
 import 'app_spacing.dart';
 import 'app_typography.dart';
 
-/// Custom [ThemeExtension] for app-specific semantic colors that
-/// don't map cleanly to the Material 3 [ColorScheme].
+/// Custom [ThemeExtension] for vaultOFF semantic colors.
 class AppThemeExtension extends ThemeExtension<AppThemeExtension> {
   const AppThemeExtension({
     required this.success,
     required this.onSuccess,
     required this.successContainer,
-    required this.warning,
-    required this.onWarning,
-    required this.warningContainer,
+    required this.waiting,
+    required this.onWaiting,
+    required this.waitingContainer,
+    required this.error,
+    required this.onError,
+    required this.errorContainer,
     required this.hairline,
+    required this.secondaryText,
+    required this.ink,
   });
 
   final Color success;
   final Color onSuccess;
   final Color successContainer;
-  final Color warning;
-  final Color onWarning;
-  final Color warningContainer;
+  final Color waiting;
+  final Color onWaiting;
+  final Color waitingContainer;
+  final Color error;
+  final Color onError;
+  final Color errorContainer;
   final Color hairline;
+  final Color secondaryText;
+  final Color ink;
 
   static const light = AppThemeExtension(
-    success: AppColors.success,
-    onSuccess: Colors.white,
-    successContainer: AppColors.successLight,
-    warning: AppColors.warning,
-    onWarning: Colors.white,
-    warningContainer: AppColors.warningLight,
-    hairline: AppColors.lightOutline,
+    success: AppColors.lightSuccessText,
+    onSuccess: AppColors.lightSuccessText,
+    successContainer: AppColors.lightSuccessContainer,
+    waiting: AppColors.lightAmberText,
+    onWaiting: AppColors.lightAmberText,
+    waitingContainer: AppColors.lightAmberContainer,
+    error: AppColors.lightError,
+    onError: AppColors.lightError,
+    errorContainer: AppColors.lightErrorContainer,
+    hairline: AppColors.lightHairline,
+    secondaryText: AppColors.lightSecondaryText,
+    ink: AppColors.lightInk,
   );
 
   static const dark = AppThemeExtension(
-    success: AppColors.successDark,
-    onSuccess: Color(0xFF0A2E1E),
-    successContainer: Color(0xFF1A3D2E),
-    warning: AppColors.warningDark,
-    onWarning: Color(0xFF2E2006),
-    warningContainer: AppColors.darkTertiaryContainer,
-    hairline: AppColors.darkOutline,
+    success: AppColors.darkSuccessText,
+    onSuccess: AppColors.darkSuccessText,
+    successContainer: AppColors.darkSuccessContainer,
+    waiting: AppColors.darkAmberText,
+    onWaiting: AppColors.darkAmberText,
+    waitingContainer: AppColors.darkAmberContainer,
+    error: AppColors.darkError,
+    onError: AppColors.darkError,
+    errorContainer: AppColors.darkErrorContainer,
+    hairline: AppColors.darkHairline,
+    secondaryText: AppColors.darkSecondaryText,
+    ink: AppColors.darkInk,
   );
 
   @override
@@ -50,21 +69,39 @@ class AppThemeExtension extends ThemeExtension<AppThemeExtension> {
     Color? success,
     Color? onSuccess,
     Color? successContainer,
+    Color? waiting,
+    Color? onWaiting,
     Color? warning,
     Color? onWarning,
+    Color? waitingContainer,
     Color? warningContainer,
+    Color? error,
+    Color? onError,
+    Color? errorContainer,
     Color? hairline,
+    Color? secondaryText,
+    Color? ink,
   }) {
     return AppThemeExtension(
       success: success ?? this.success,
       onSuccess: onSuccess ?? this.onSuccess,
       successContainer: successContainer ?? this.successContainer,
-      warning: warning ?? this.warning,
-      onWarning: onWarning ?? this.onWarning,
-      warningContainer: warningContainer ?? this.warningContainer,
+      waiting: waiting ?? warning ?? this.waiting,
+      onWaiting: onWaiting ?? onWarning ?? this.onWaiting,
+      waitingContainer: waitingContainer ?? warningContainer ?? this.waitingContainer,
+      error: error ?? this.error,
+      onError: onError ?? this.onError,
+      errorContainer: errorContainer ?? this.errorContainer,
       hairline: hairline ?? this.hairline,
+      secondaryText: secondaryText ?? this.secondaryText,
+      ink: ink ?? this.ink,
     );
   }
+
+  // Backward compatibility getters
+  Color get warning => waiting;
+  Color get onWarning => onWaiting;
+  Color get warningContainer => waitingContainer;
 
   @override
   AppThemeExtension lerp(covariant AppThemeExtension? other, double t) {
@@ -73,10 +110,15 @@ class AppThemeExtension extends ThemeExtension<AppThemeExtension> {
       success: Color.lerp(success, other.success, t)!,
       onSuccess: Color.lerp(onSuccess, other.onSuccess, t)!,
       successContainer: Color.lerp(successContainer, other.successContainer, t)!,
-      warning: Color.lerp(warning, other.warning, t)!,
-      onWarning: Color.lerp(onWarning, other.onWarning, t)!,
-      warningContainer: Color.lerp(warningContainer, other.warningContainer, t)!,
+      waiting: Color.lerp(waiting, other.waiting, t)!,
+      onWaiting: Color.lerp(onWaiting, other.onWaiting, t)!,
+      waitingContainer: Color.lerp(waitingContainer, other.waitingContainer, t)!,
+      error: Color.lerp(error, other.error, t)!,
+      onError: Color.lerp(onError, other.onError, t)!,
+      errorContainer: Color.lerp(errorContainer, other.errorContainer, t)!,
       hairline: Color.lerp(hairline, other.hairline, t)!,
+      secondaryText: Color.lerp(secondaryText, other.secondaryText, t)!,
+      ink: Color.lerp(ink, other.ink, t)!,
     );
   }
 }
@@ -84,16 +126,11 @@ class AppThemeExtension extends ThemeExtension<AppThemeExtension> {
 /// Extension to conveniently access [AppThemeExtension] from [BuildContext].
 extension AppThemeExtensionX on BuildContext {
   AppThemeExtension get appColors =>
-      Theme.of(this).extension<AppThemeExtension>()!;
+      Theme.of(this).extension<AppThemeExtension>() ?? AppThemeExtension.light;
 }
 
-/// Central theme configuration for the Offline Vault app.
-///
-/// Provides both light and dark [ThemeData] with Material 3 color schemes,
-/// shape themes, and component customizations aligned to the 8-point grid.
+/// Central theme configuration for vaultOFF.
 abstract final class AppTheme {
-  // ── Light theme ────────────────────────────────────────────────────────
-
   static ThemeData get lightTheme => light;
   static ThemeData get darkTheme => dark;
 
@@ -109,11 +146,12 @@ abstract final class AppTheme {
       primaryContainer: AppColors.lightPrimaryContainer,
       onPrimaryContainer: AppColors.lightPrimary,
       secondary: AppColors.lightSecondary,
-      tertiary: AppColors.lightTertiary,
-      tertiaryContainer: AppColors.lightTertiaryContainer,
+      onSecondary: Colors.white,
+      tertiary: AppColors.lightAmberText,
+      tertiaryContainer: AppColors.lightAmberContainer,
       error: AppColors.lightError,
       errorContainer: AppColors.lightErrorContainer,
-      outline: AppColors.lightOutline,
+      outline: AppColors.lightHairline,
       outlineVariant: AppColors.lightOutlineVariant,
     );
 
@@ -125,8 +163,6 @@ abstract final class AppTheme {
     );
   }
 
-  // ── Dark theme ─────────────────────────────────────────────────────────
-
   static ThemeData get dark {
     final colorScheme = ColorScheme.fromSeed(
       seedColor: AppColors.darkPrimary,
@@ -135,15 +171,16 @@ abstract final class AppTheme {
       surface: AppColors.darkSurface,
       onSurface: AppColors.darkInk,
       primary: AppColors.darkPrimary,
-      onPrimary: const Color(0xFF0A2E2D),
+      onPrimary: const Color(0xFF101615),
       primaryContainer: AppColors.darkPrimaryContainer,
       onPrimaryContainer: AppColors.darkPrimary,
       secondary: AppColors.darkSecondary,
-      tertiary: AppColors.darkTertiary,
-      tertiaryContainer: AppColors.darkTertiaryContainer,
+      onSecondary: Colors.white,
+      tertiary: AppColors.darkAmberText,
+      tertiaryContainer: AppColors.darkAmberContainer,
       error: AppColors.darkError,
       errorContainer: AppColors.darkErrorContainer,
-      outline: AppColors.darkOutline,
+      outline: AppColors.darkHairline,
       outlineVariant: AppColors.darkOutlineVariant,
     );
 
@@ -154,8 +191,6 @@ abstract final class AppTheme {
       extension: AppThemeExtension.dark,
     );
   }
-
-  // ── Shared builder ─────────────────────────────────────────────────────
 
   static ThemeData _buildThemeData({
     required ColorScheme colorScheme,
@@ -176,8 +211,8 @@ abstract final class AppTheme {
       // ── AppBar ───────────────────────────────────────────────────────
       appBarTheme: AppBarTheme(
         centerTitle: false,
-        elevation: AppSpacing.elevationNone,
-        scrolledUnderElevation: AppSpacing.elevationLow,
+        elevation: 0,
+        scrolledUnderElevation: 0,
         backgroundColor: scaffoldBackground,
         surfaceTintColor: Colors.transparent,
         titleTextStyle: textTheme.titleLarge?.copyWith(
@@ -185,15 +220,16 @@ abstract final class AppTheme {
         ),
         iconTheme: IconThemeData(
           color: colorScheme.onSurface,
-          size: 24,
+          size: 22,
         ),
       ),
 
-      // ── Cards ────────────────────────────────────────────────────────
+      // ── 16 dp Cards with 1 dp hairline border, no shadow ─────────────
       cardTheme: CardThemeData(
-        elevation: AppSpacing.elevationLow,
+        elevation: 0,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(color: extension.hairline, width: 1),
         ),
         clipBehavior: Clip.antiAlias,
         margin: EdgeInsets.zero,
@@ -201,156 +237,98 @@ abstract final class AppTheme {
         surfaceTintColor: Colors.transparent,
       ),
 
-      // ── Filled buttons ───────────────────────────────────────────────
+      // ── 12 dp Buttons, 48 dp height, 44 dp min target ─────────────────
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
-          minimumSize: const Size(64, AppSpacing.minTouchTarget),
+          minimumSize: const Size(64, 48),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppSpacing.buttonRadius),
+            borderRadius: BorderRadius.circular(12),
           ),
           textStyle: textTheme.labelLarge,
           padding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.lg,
-            vertical: AppSpacing.md,
+            vertical: AppSpacing.sm,
           ),
         ),
       ),
 
-      // ── Elevated buttons ─────────────────────────────────────────────
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          minimumSize: const Size(64, AppSpacing.minTouchTarget),
+          elevation: 0,
+          minimumSize: const Size(64, 48),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppSpacing.buttonRadius),
+            borderRadius: BorderRadius.circular(12),
           ),
           textStyle: textTheme.labelLarge,
           padding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.lg,
-            vertical: AppSpacing.md,
+            vertical: AppSpacing.sm,
           ),
         ),
       ),
 
-      // ── Outlined buttons ─────────────────────────────────────────────
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          minimumSize: const Size(64, AppSpacing.minTouchTarget),
+          minimumSize: const Size(64, 48),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppSpacing.buttonRadius),
+            borderRadius: BorderRadius.circular(12),
           ),
-          side: BorderSide(color: colorScheme.outline),
+          side: BorderSide(color: extension.hairline, width: 1),
           textStyle: textTheme.labelLarge,
           padding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.lg,
-            vertical: AppSpacing.md,
+            vertical: AppSpacing.sm,
           ),
         ),
       ),
 
-      // ── Text buttons ─────────────────────────────────────────────────
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          minimumSize: const Size(AppSpacing.minTouchTarget, AppSpacing.minTouchTarget),
+          minimumSize: const Size(44, 44),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppSpacing.buttonRadius),
+            borderRadius: BorderRadius.circular(12),
           ),
           textStyle: textTheme.labelLarge,
         ),
       ),
 
-      // ── Icon buttons ─────────────────────────────────────────────────
-      iconButtonTheme: IconButtonThemeData(
-        style: IconButton.styleFrom(
-          minimumSize: const Size(AppSpacing.iconButtonSize, AppSpacing.iconButtonSize),
-        ),
-      ),
-
-      // ── Input decoration ─────────────────────────────────────────────
+      // ── Input Fields ─────────────────────────────────────────────────
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: colorScheme.surface,
         contentPadding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.md,
+          horizontal: AppSpacing.lg,
           vertical: AppSpacing.md,
         ),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppSpacing.inputRadius),
-          borderSide: BorderSide(color: colorScheme.outline),
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: extension.hairline, width: 1),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppSpacing.inputRadius),
-          borderSide: BorderSide(color: colorScheme.outline),
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: extension.hairline, width: 1),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppSpacing.inputRadius),
-          borderSide: BorderSide(color: colorScheme.primary, width: 2),
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: colorScheme.primary, width: 1.5),
         ),
         errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppSpacing.inputRadius),
-          borderSide: BorderSide(color: colorScheme.error),
-        ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppSpacing.inputRadius),
-          borderSide: BorderSide(color: colorScheme.error, width: 2),
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: colorScheme.error, width: 1),
         ),
       ),
 
-      // ── Dialogs ──────────────────────────────────────────────────────
-      dialogTheme: DialogThemeData(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppSpacing.dialogRadius),
-        ),
-        backgroundColor: colorScheme.surface,
-        surfaceTintColor: Colors.transparent,
+      // ── Icon Theme (22 dp outlined set) ──────────────────────────────
+      iconTheme: IconThemeData(
+        color: colorScheme.onSurface,
+        size: 22,
       ),
 
-      // ── Bottom sheets ────────────────────────────────────────────────
-      bottomSheetTheme: BottomSheetThemeData(
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(
-            top: Radius.circular(AppSpacing.bottomSheetRadius),
-          ),
-        ),
-        backgroundColor: colorScheme.surface,
-        surfaceTintColor: Colors.transparent,
-        showDragHandle: true,
-      ),
-
-      // ── Chips ────────────────────────────────────────────────────────
-      chipTheme: ChipThemeData(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppSpacing.chipRadius),
-        ),
-      ),
-
-      // ── Divider ──────────────────────────────────────────────────────
+      // ── Dividers ─────────────────────────────────────────────────────
       dividerTheme: DividerThemeData(
-        color: colorScheme.outline,
+        color: extension.hairline,
         thickness: 1,
         space: 1,
-      ),
-
-      // ── Snackbar ─────────────────────────────────────────────────────
-      snackBarTheme: SnackBarThemeData(
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppSpacing.chipRadius),
-        ),
-      ),
-
-      // ── Navigation bar ───────────────────────────────────────────────
-      navigationBarTheme: NavigationBarThemeData(
-        elevation: AppSpacing.elevationMedium,
-        backgroundColor: colorScheme.surface,
-        surfaceTintColor: Colors.transparent,
-        indicatorColor: colorScheme.primaryContainer,
-        labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-      ),
-
-      // ── Progress indicators ──────────────────────────────────────────
-      progressIndicatorTheme: ProgressIndicatorThemeData(
-        color: colorScheme.primary,
-        linearTrackColor: colorScheme.primaryContainer,
       ),
     );
   }

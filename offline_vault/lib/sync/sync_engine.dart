@@ -4,8 +4,7 @@ import 'package:drift/drift.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../core/crypto/crypto_service.dart';
-import '../core/crypto/key_manager.dart';
+
 import '../core/network/connectivity_service.dart';
 import '../core/storage/file_storage_service.dart';
 import '../core/utils/logger.dart';
@@ -27,9 +26,7 @@ final syncEngineProvider = Provider<SyncEngine>((ref) {
   final supabase = ref.watch(supabaseClientProvider);
   final remoteSource = ref.watch(groupsRemoteSourceProvider);
   final uploadQueueRepo = ref.watch(uploadQueueRepositoryProvider);
-  final keyManager = ref.watch(keyManagerProvider);
-  final crypto = CryptoService(keyManager: keyManager);
-  final storageService = FileStorageService(cryptoService: crypto);
+  final storageService = ref.watch(fileStorageProvider);
   final connectivity = ref.watch(connectivityServiceProvider);
 
   return SyncEngine(
@@ -77,7 +74,7 @@ class SyncEngine {
     _isRunning = true;
     VaultLogger.i('Starting sync engine cycle triggered by $trigger');
     final startTime = DateTime.now();
-    int bytesDown = 0;
+    const int bytesDown = 0;
     int bytesUp = 0;
 
     try {
@@ -132,7 +129,7 @@ class SyncEngine {
         SyncLogCompanion.insert(
           startedAt: startTime,
           endedAt: Value(DateTime.now()),
-          bytesDown: Value(bytesDown),
+          bytesDown: const Value(bytesDown),
           bytesUp: Value(bytesUp),
           result: const Value('success'),
         ),

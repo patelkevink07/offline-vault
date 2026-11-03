@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
@@ -111,3 +112,9 @@ class FileStorageService {
     return tempFile.path;
   }
 }
+
+/// Riverpod provider for a shared [FileStorageService] instance.
+final fileStorageProvider = Provider<FileStorageService>((ref) {
+  final crypto = ref.watch(cryptoServiceProvider);
+  return FileStorageService(cryptoService: crypto);
+});

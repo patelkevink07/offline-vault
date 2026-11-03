@@ -8,8 +8,7 @@ import 'package:mime/mime.dart';
 
 import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_spacing.dart';
-import '../../../core/crypto/crypto_service.dart';
-import '../../../core/crypto/key_manager.dart';
+
 import '../../../core/storage/file_storage_service.dart';
 import '../../../data/models/compression_quality.dart';
 import '../../../data/repositories/upload_queue_repository.dart';
@@ -104,9 +103,7 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
 
     try {
       final queueRepo = ref.read(uploadQueueRepositoryProvider);
-      final keyManager = KeyManager();
-      final crypto = CryptoService(keyManager: keyManager);
-      final storage = FileStorageService(cryptoService: crypto);
+      final storage = ref.read(fileStorageProvider);
 
       for (final item in _selectedItems) {
         String customName = item.nameController.text.trim();

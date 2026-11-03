@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_spacing.dart';
+import '../../../core/security/pin_service.dart';
 import '../../../core/storage/secure_prefs.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../auth/application/auth_controller.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -14,10 +17,11 @@ class SettingsScreen extends ConsumerStatefulWidget {
 }
 
 class _SettingsScreenState extends ConsumerState<SettingsScreen> {
-  final SecurePrefs _prefs = SecurePrefs();
   bool _wifiOnly = true;
   bool _blockScreenshots = false;
   bool _hasPin = false;
+  bool _biometricsEnabled = false;
+  bool _canUseBiometrics = false;
   String _language = 'en';
 
   @override
@@ -27,83 +31,109 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   Future<void> _loadSettings() async {
-    final wifi = await _prefs.getSyncOnWifiOnly();
-    final block = await _prefs.getBlockScreenshots();
-    final pin = await _prefs.hasPin();
-    final lang = await _prefs.getLanguageCode() ?? 'en';
+    final prefs = ref.read(securePrefsProvider);
+    final pinService = ref.read(pinServiceProvider);
 
-    setState(() {
-      _wifiOnly = wifi;
-      _blockScreenshots = block;
-      _hasPin = pin;
-      _language = lang;
-    });
+    final wifi = await prefs.getSyncOnWifiOnly();
+    final block = await prefs.getBlockScreenshots();
+    final pin = await pinService.hasPin();
+    final bioEnabled = await prefs.getBiometricsEnabled();
+    final canBio = await pinService.canUseBiometrics();
+    final lang = await prefs.getLanguageCode() ?? 'en';
+
+    if (mounted) {
+      setState(() {
+        _wifiOnly = wifi;
+        _blockScreenshots = block;
+        _hasPin = pin;
+        _biometricsEnabled = bioEnabled;
+        _canUseBiometrics = canBio;
+        _language = lang;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final prefs = ref.read(securePrefsProvider);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Settings'),
+        title: Text(l10n.settings),
       ),
       body: ListView(
         children: [
           // Sync Section
-          _buildSectionHeader('Sync & Network'),
+          _buildSectionHeader(l10n.syncAndNetwork),
           SwitchListTile(
-            title: const Text('Sync on Wi-Fi only'),
-            subtitle: const Text('Prevent using mobile data for automatic background sync'),
+            title: Text(l10n.syncWifiOnly),
+            subtitle: Text(l10n.syncWifiOnlySubtitle),
             value: _wifiOnly,
             onChanged: (val) async {
               setState(() => _wifiOnly = val);
-              await _prefs.setSyncOnWifiOnly(val);
+              await prefs.setSyncOnWifiOnly(val);
             },
           ),
           const Divider(),
 
           // Security Section
-          _buildSectionHeader('Privacy & Security'),
+          _buildSectionHeader(l10n.privacyAndSecurity),
           SwitchListTile(
-            title: const Text('Block screenshots'),
-            subtitle: const Text('Prevent screen captures and hide content in app switcher'),
+            title: Text(l10n.blockScreenshots),
+            subtitle: Text(l10n.blockScreenshotsSubtitle),
             value: _blockScreenshots,
             onChanged: (val) async {
               setState(() => _blockScreenshots = val);
-              await _prefs.setBlockScreenshots(val);
+              await prefs.setBlockScreenshots(val);
             },
           ),
           ListTile(
-            title: const Text('App Lock & PIN'),
-            subtitle: Text(_hasPin ? 'PIN is set' : 'No PIN configured'),
+            title: Text(l10n.settingsAppLockTitle),
+            subtitle: Text(
+              _hasPin
+                  ? l10n.settingsAppLockSubtitleSet
+                  : l10n.settingsAppLockSubtitleNotSet,
+            ),
             trailing: const Icon(Icons.chevron_right_rounded),
-            onTap: () => _showSetPinDialog(),
+            onTap: _hasPin ? _showPinOptionsSheet : _showSetPinDialog,
           ),
+          if (_hasPin && _canUseBiometrics)
+            SwitchListTile(
+              title: Text(l10n.biometricsEnabled),
+              subtitle: Text(l10n.biometricsSubtitle),
+              value: _biometricsEnabled,
+              onChanged: (val) async {
+                setState(() => _biometricsEnabled = val);
+                await ref.read(pinServiceProvider).setBiometricsEnabled(val);
+              },
+            ),
           const Divider(),
 
           // Storage Section
-          _buildSectionHeader('Storage'),
+          _buildSectionHeader(l10n.storage),
           ListTile(
             leading: const Icon(Icons.cleaning_services_outlined),
-            title: const Text('Free up space'),
-            subtitle: const Text('Removes original downloads while keeping thumbnails offline'),
+            title: Text(l10n.freeUpSpace),
+            subtitle: Text(l10n.freeUpSpaceSubtitle),
             onTap: () {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Space cleared. Thumbnails retained.')),
+                SnackBar(content: Text(l10n.spaceCleared)),
               );
             },
           ),
           const Divider(),
 
           // Language Section
-          _buildSectionHeader('Language'),
+          _buildSectionHeader(l10n.language),
           RadioListTile<String>(
             title: const Text('English'),
             value: 'en',
             groupValue: _language,
             onChanged: (val) async {
-              setState(() => _language = val!);
-              await _prefs.setLanguageCode(val!);
+              if (val == null) return;
+              setState(() => _language = val);
+              await prefs.setLanguageCode(val);
             },
           ),
           RadioListTile<String>(
@@ -111,8 +141,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             value: 'gu',
             groupValue: _language,
             onChanged: (val) async {
-              setState(() => _language = val!);
-              await _prefs.setLanguageCode(val!);
+              if (val == null) return;
+              setState(() => _language = val);
+              await prefs.setLanguageCode(val);
             },
           ),
           RadioListTile<String>(
@@ -120,17 +151,22 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             value: 'hi',
             groupValue: _language,
             onChanged: (val) async {
-              setState(() => _language = val!);
-              await _prefs.setLanguageCode(val!);
+              if (val == null) return;
+              setState(() => _language = val);
+              await prefs.setLanguageCode(val);
             },
           ),
           const Divider(),
 
           // Account Section
-          _buildSectionHeader('Account'),
+          _buildSectionHeader(l10n.account),
           ListTile(
-            leading: const Icon(Icons.logout_rounded, color: AppColors.lightError),
-            title: const Text('Sign out', style: TextStyle(color: AppColors.lightError)),
+            leading:
+                const Icon(Icons.logout_rounded, color: AppColors.lightError),
+            title: Text(
+              l10n.signOut,
+              style: const TextStyle(color: AppColors.lightError),
+            ),
             onTap: () => ref.read(authControllerProvider.notifier).signOut(),
           ),
           const SizedBox(height: AppSpacing.xxl),
@@ -153,34 +189,341 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
+  void _showPinOptionsSheet() {
+    final l10n = AppLocalizations.of(context);
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.password_rounded),
+                title: Text(l10n.settingsChangePin),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _showChangePinDialog();
+                },
+              ),
+              ListTile(
+                leading:
+                    const Icon(Icons.delete_outline, color: AppColors.lightError),
+                title: Text(
+                  l10n.settingsRemovePin,
+                  style: const TextStyle(color: AppColors.lightError),
+                ),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _showRemovePinDialog();
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   void _showSetPinDialog() {
-    final controller = TextEditingController();
+    final l10n = AppLocalizations.of(context);
+    final newPinController = TextEditingController();
+    final confirmPinController = TextEditingController();
+    String? errorMessage;
+
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Set 4-Digit PIN'),
-        content: TextField(
-          controller: controller,
-          keyboardType: TextInputType.number,
-          maxLength: 4,
-          obscureText: true,
-          decoration: const InputDecoration(labelText: 'Enter 4 digits', border: OutlineInputBorder()),
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
-          FilledButton(
-            onPressed: () async {
-              if (controller.text.length == 4) {
-                final navigator = Navigator.of(ctx);
-                await _prefs.setPinHash(controller.text, 'salt');
-                if (!mounted) return;
-                setState(() => _hasPin = true);
-                navigator.pop();
-              }
-            },
-            child: const Text('Save PIN'),
-          ),
-        ],
+      builder: (ctx) => StatefulBuilder(
+        builder: (dialogCtx, setDialogState) {
+          return AlertDialog(
+            title: Text(l10n.pinDialogTitleSet),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l10n.pinRecommendation,
+                    style: Theme.of(dialogCtx).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(dialogCtx).colorScheme.onSurfaceVariant,
+                        ),
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                  TextField(
+                    controller: newPinController,
+                    keyboardType: TextInputType.number,
+                    obscureText: true,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly,
+                      LengthLimitingTextInputFormatter(8),
+                    ],
+                    decoration: InputDecoration(
+                      labelText: l10n.enterNewPin,
+                      border: const OutlineInputBorder(),
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  TextField(
+                    controller: confirmPinController,
+                    keyboardType: TextInputType.number,
+                    obscureText: true,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly,
+                      LengthLimitingTextInputFormatter(8),
+                    ],
+                    decoration: InputDecoration(
+                      labelText: l10n.confirmNewPin,
+                      border: const OutlineInputBorder(),
+                      errorText: errorMessage,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: Text(l10n.cancel),
+              ),
+              FilledButton(
+                onPressed: () async {
+                  final newPin = newPinController.text.trim();
+                  final confirmPin = confirmPinController.text.trim();
+
+                  if (newPin.length < 4 || newPin.length > 8) {
+                    setDialogState(() {
+                      errorMessage = l10n.pinLengthError;
+                    });
+                    return;
+                  }
+
+                  if (newPin != confirmPin) {
+                    setDialogState(() {
+                      errorMessage = l10n.pinMismatch;
+                    });
+                    return;
+                  }
+
+                  final navigator = Navigator.of(ctx);
+                  final pinService = ref.read(pinServiceProvider);
+                  await pinService.setPin(newPin: newPin);
+
+                  if (!mounted) return;
+                  navigator.pop();
+                  await _loadSettings();
+                },
+                child: Text(l10n.savePin),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  void _showChangePinDialog() {
+    final l10n = AppLocalizations.of(context);
+    final currentPinController = TextEditingController();
+    final newPinController = TextEditingController();
+    final confirmPinController = TextEditingController();
+    String? errorMessage;
+
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (dialogCtx, setDialogState) {
+          return AlertDialog(
+            title: Text(l10n.pinDialogTitleChange),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  TextField(
+                    controller: currentPinController,
+                    keyboardType: TextInputType.number,
+                    obscureText: true,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly,
+                      LengthLimitingTextInputFormatter(8),
+                    ],
+                    decoration: InputDecoration(
+                      labelText: l10n.enterCurrentPin,
+                      border: const OutlineInputBorder(),
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  Text(
+                    l10n.pinRecommendation,
+                    style: Theme.of(dialogCtx).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(dialogCtx).colorScheme.onSurfaceVariant,
+                        ),
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  TextField(
+                    controller: newPinController,
+                    keyboardType: TextInputType.number,
+                    obscureText: true,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly,
+                      LengthLimitingTextInputFormatter(8),
+                    ],
+                    decoration: InputDecoration(
+                      labelText: l10n.enterNewPin,
+                      border: const OutlineInputBorder(),
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  TextField(
+                    controller: confirmPinController,
+                    keyboardType: TextInputType.number,
+                    obscureText: true,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly,
+                      LengthLimitingTextInputFormatter(8),
+                    ],
+                    decoration: InputDecoration(
+                      labelText: l10n.confirmNewPin,
+                      border: const OutlineInputBorder(),
+                      errorText: errorMessage,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: Text(l10n.cancel),
+              ),
+              FilledButton(
+                onPressed: () async {
+                  final navigator = Navigator.of(ctx);
+                  final currentPin = currentPinController.text.trim();
+                  final newPin = newPinController.text.trim();
+                  final confirmPin = confirmPinController.text.trim();
+
+                  final pinService = ref.read(pinServiceProvider);
+                  final verify = await pinService.verifyPin(currentPin);
+                  if (!verify.success) {
+                    setDialogState(() {
+                      if (verify.isLockedOut &&
+                          verify.remainingLockout != null) {
+                        errorMessage = l10n.pinLockoutMessage(
+                          verify.remainingLockout!.inSeconds,
+                        );
+                      } else {
+                        errorMessage = l10n.pinIncorrect;
+                      }
+                    });
+                    return;
+                  }
+
+                  if (newPin.length < 4 || newPin.length > 8) {
+                    setDialogState(() {
+                      errorMessage = l10n.pinLengthError;
+                    });
+                    return;
+                  }
+
+                  if (newPin != confirmPin) {
+                    setDialogState(() {
+                      errorMessage = l10n.pinMismatch;
+                    });
+                    return;
+                  }
+
+                  await pinService.changePin(
+                    currentPin: currentPin,
+                    newPin: newPin,
+                  );
+
+                  if (!mounted) return;
+                  navigator.pop();
+                  await _loadSettings();
+                },
+                child: Text(l10n.savePin),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  void _showRemovePinDialog() {
+    final l10n = AppLocalizations.of(context);
+    final currentPinController = TextEditingController();
+    String? errorMessage;
+
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (dialogCtx, setDialogState) {
+          return AlertDialog(
+            title: Text(l10n.pinDialogTitleRemove),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: currentPinController,
+                  keyboardType: TextInputType.number,
+                  obscureText: true,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly,
+                    LengthLimitingTextInputFormatter(8),
+                  ],
+                  decoration: InputDecoration(
+                    labelText: l10n.enterCurrentPin,
+                    border: const OutlineInputBorder(),
+                    errorText: errorMessage,
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: Text(l10n.cancel),
+              ),
+              FilledButton(
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppColors.lightError,
+                ),
+                onPressed: () async {
+                  final navigator = Navigator.of(ctx);
+                  final currentPin = currentPinController.text.trim();
+                  final pinService = ref.read(pinServiceProvider);
+
+                  final verify = await pinService.verifyPin(currentPin);
+                  if (!verify.success) {
+                    setDialogState(() {
+                      if (verify.isLockedOut &&
+                          verify.remainingLockout != null) {
+                        errorMessage = l10n.pinLockoutMessage(
+                          verify.remainingLockout!.inSeconds,
+                        );
+                      } else {
+                        errorMessage = l10n.pinIncorrect;
+                      }
+                    });
+                    return;
+                  }
+
+                  await pinService.removePin(currentPin);
+                  if (!mounted) return;
+                  navigator.pop();
+                  await _loadSettings();
+                },
+                child: Text(l10n.settingsRemovePin),
+              ),
+            ],
+          );
+        },
       ),
     );
   }

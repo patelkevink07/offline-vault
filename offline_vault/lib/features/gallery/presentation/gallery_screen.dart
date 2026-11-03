@@ -6,8 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_spacing.dart';
-import '../../../core/crypto/crypto_service.dart';
-import '../../../core/crypto/key_manager.dart';
+
 import '../../../core/storage/file_storage_service.dart';
 import '../../../data/local/database.dart';
 import '../../../data/repositories/folders_repository.dart';
@@ -276,9 +275,7 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
 
   Future<Uint8List> _decryptThumb(String path) async {
     if (_thumbCache.containsKey(path)) return _thumbCache[path]!;
-    final keyManager = KeyManager();
-    final crypto = CryptoService(keyManager: keyManager);
-    final storage = FileStorageService(cryptoService: crypto);
+    final storage = ref.read(fileStorageProvider);
     final bytes = await storage.readDecryptedFile(path);
     _thumbCache[path] = bytes;
     return bytes;

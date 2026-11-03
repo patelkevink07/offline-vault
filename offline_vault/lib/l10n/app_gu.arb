@@ -84,5 +84,47 @@
   "uploadPending": "અપલોડ બાકી છે",
   "syncFailed": "સિંક નિષ્ફળ થયું",
   "networkErrorMessage": "તમારું ઇન્ટરનેટ કનેક્શન તપાસો અને ફરી પ્રયાસ કરો.",
-  "unknownError": "કંઈક અણધાર્યું થયું. કૃપા કરીને ફરી પ્રયાસ કરો."
+  "unknownError": "કંઈક અણધાર્યું થયું. કૃપા કરીને ફરી પ્રયાસ કરો.",
+  "settingsAppLockTitle": "ઍપ લૉક અને પિન",
+  "settingsAppLockSubtitleSet": "પિન સેટ કરેલ છે",
+  "settingsAppLockSubtitleNotSet": "પિન રૂપરેખાંકિત નથી",
+  "settingsSetPin": "પિન સેટ કરો",
+  "settingsChangePin": "પિન બદલો",
+  "settingsRemovePin": "પિન દૂર કરો",
+  "pinDialogTitleSet": "પિન સેટ કરો",
+  "pinDialogTitleChange": "પિન બદલો",
+  "pinDialogTitleRemove": "પિન દૂર કરો",
+  "pinRecommendation": "અમે 6-અંકના પિનની ભલામણ કરીએ છીએ (4 થી 8 અંકો માન્ય છે)",
+  "enterPin": "પિન દાખલ કરો",
+  "enterCurrentPin": "વર્તમાન પિન દાખલ કરો",
+  "enterNewPin": "નવો પિન દાખલ કરો",
+  "confirmNewPin": "નવા પિનની પુષ્ટિ કરો",
+  "pinMismatch": "પિન મેળ ખાતા નથી",
+  "pinLengthError": "પિન 4 થી 8 અંક વચ્ચે હોવો જોઈએ",
+  "pinIncorrect": "ખોટો પિન. કૃપા કરીને ફરી પ્રયાસ કરો.",
+  "pinLockoutMessage": "ઘણા બધા ખોટા પ્રયાસો. {seconds} સેકન્ડમાં ફરી પ્રયાસ કરો",
+  "@pinLockoutMessage": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "biometricPrompt": "vaultOFF અનલૉક કરો",
+  "biometricsEnabled": "બાયોમેટ્રિક અનલૉક",
+  "biometricsSubtitle": "અનલૉક કરવા માટે ફિંગરપ્રિન્ટ અથવા ફેસનો ઉપયોગ કરો",
+  "unlock": "અનલૉક કરો",
+  "savePin": "પિન સાચવો",
+  "syncAndNetwork": "સિંક અને નેટવર્ક",
+  "syncWifiOnly": "માત્ર Wi-Fi પર સિંક કરો",
+  "syncWifiOnlySubtitle": "સ્વચાલિત પૃષ્ઠભૂમિ સિંક માટે મોબાઇલ ડેટાનો ઉપયોગ અટકાવો",
+  "privacyAndSecurity": "ગોપનીયતા અને સુરક્ષા",
+  "blockScreenshots": "સ્ક્રીનશોટ બ્લૉક કરો",
+  "blockScreenshotsSubtitle": "સ્ક્રીન કેપ્ચર અટકાવો અને ઍપ સ્વિચરમાં સામગ્રી છુપાવો",
+  "storage": "સ્ટોરેજ",
+  "freeUpSpace": "જગ્યા ખાલી કરો",
+  "freeUpSpaceSubtitle": "થંબનેલ્સ ઑફલાઇન રાખીને મૂળ ડાઉનલોડ્સ દૂર કરે છે",
+  "spaceCleared": "જગ્યા ખાલી થઈ ગઈ. થંબનેલ્સ સચવાયેલા છે.",
+  "language": "ભાષા",
+  "account": "ખાતું"
 }

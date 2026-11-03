@@ -1,3 +1,4 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 /// Secure preferences wrapper around [FlutterSecureStorage].
@@ -14,6 +15,9 @@ class SecurePrefs {
 
   static const String _keyPinHash = 'vault_pin_hash';
   static const String _keyPinSalt = 'vault_pin_salt';
+  static const String _keyPinIterations = 'vault_pin_iterations';
+  static const String _keyFailedPinAttempts = 'vault_pin_failed_attempts';
+  static const String _keyPinLockoutUntil = 'vault_pin_locked_until';
   static const String _keyBiometricsEnabled = 'vault_biometrics_enabled';
   static const String _keySyncOnWifiOnly = 'vault_sync_wifi_only';
   static const String _keyBlockScreenshots = 'vault_block_screenshots';
@@ -26,20 +30,52 @@ class SecurePrefs {
 
   Future<void> deleteKey(String key) => _storage.delete(key: key);
 
-  Future<void> setPinHash(String hash, String salt) async {
+  Future<void> setPinHash({
+    required String hash,
+    required String salt,
+    int iterations = 100000,
+  }) async {
     await writeString(_keyPinHash, hash);
     await writeString(_keyPinSalt, salt);
+    await writeString(_keyPinIterations, iterations.toString());
   }
 
-  Future<({String? hash, String? salt})> getPinHashAndSalt() async {
+  Future<({String? hash, String? salt, int iterations})> getPinHashAndSalt() async {
     final hash = await readString(_keyPinHash);
     final salt = await readString(_keyPinSalt);
-    return (hash: hash, salt: salt);
+    final iterStr = await readString(_keyPinIterations);
+    final iterations = int.tryParse(iterStr ?? '') ?? 100000;
+    return (hash: hash, salt: salt, iterations: iterations);
+  }
+
+  Future<int> getFailedPinAttempts() async {
+    final raw = await readString(_keyFailedPinAttempts);
+    return int.tryParse(raw ?? '0') ?? 0;
+  }
+
+  Future<void> setFailedPinAttempts(int attempts) =>
+      writeString(_keyFailedPinAttempts, attempts.toString());
+
+  Future<DateTime?> getPinLockoutUntil() async {
+    final raw = await readString(_keyPinLockoutUntil);
+    if (raw == null) return null;
+    return DateTime.tryParse(raw);
+  }
+
+  Future<void> setPinLockoutUntil(DateTime? until) async {
+    if (until == null) {
+      await deleteKey(_keyPinLockoutUntil);
+    } else {
+      await writeString(_keyPinLockoutUntil, until.toIso8601String());
+    }
   }
 
   Future<void> clearPin() async {
     await deleteKey(_keyPinHash);
     await deleteKey(_keyPinSalt);
+    await deleteKey(_keyPinIterations);
+    await deleteKey(_keyFailedPinAttempts);
+    await deleteKey(_keyPinLockoutUntil);
   }
 
   Future<bool> hasPin() async {
@@ -76,3 +112,7 @@ class SecurePrefs {
 
   Future<String?> getLanguageCode() => readString(_keyLanguageCode);
 }
+
+final securePrefsProvider = Provider<SecurePrefs>((ref) {
+  return SecurePrefs();
+});

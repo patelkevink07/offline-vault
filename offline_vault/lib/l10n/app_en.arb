@@ -84,5 +84,47 @@
   "uploadPending": "Upload pending",
   "syncFailed": "Sync failed",
   "networkErrorMessage": "Check your internet connection and try again.",
-  "unknownError": "Something unexpected happened. Please try again."
+  "unknownError": "Something unexpected happened. Please try again.",
+  "settingsAppLockTitle": "App Lock & PIN",
+  "settingsAppLockSubtitleSet": "PIN configured",
+  "settingsAppLockSubtitleNotSet": "No PIN configured",
+  "settingsSetPin": "Set PIN",
+  "settingsChangePin": "Change PIN",
+  "settingsRemovePin": "Remove PIN",
+  "pinDialogTitleSet": "Set PIN",
+  "pinDialogTitleChange": "Change PIN",
+  "pinDialogTitleRemove": "Remove PIN",
+  "pinRecommendation": "We recommend a 6-digit PIN (4 to 8 digits allowed)",
+  "enterPin": "Enter PIN",
+  "enterCurrentPin": "Enter current PIN",
+  "enterNewPin": "Enter new PIN",
+  "confirmNewPin": "Confirm new PIN",
+  "pinMismatch": "PINs do not match",
+  "pinLengthError": "PIN must be between 4 and 8 digits",
+  "pinIncorrect": "Incorrect PIN. Please try again.",
+  "pinLockoutMessage": "Too many failed attempts. Try again in {seconds}s",
+  "@pinLockoutMessage": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "biometricPrompt": "Unlock vaultOFF",
+  "biometricsEnabled": "Biometric unlock",
+  "biometricsSubtitle": "Use fingerprint or face to unlock",
+  "unlock": "Unlock",
+  "savePin": "Save PIN",
+  "syncAndNetwork": "Sync & Network",
+  "syncWifiOnly": "Sync on Wi-Fi only",
+  "syncWifiOnlySubtitle": "Prevent using mobile data for automatic background sync",
+  "privacyAndSecurity": "Privacy & Security",
+  "blockScreenshots": "Block screenshots",
+  "blockScreenshotsSubtitle": "Prevent screen captures and hide content in app switcher",
+  "storage": "Storage",
+  "freeUpSpace": "Free up space",
+  "freeUpSpaceSubtitle": "Removes original downloads while keeping thumbnails offline",
+  "spaceCleared": "Space cleared. Thumbnails retained.",
+  "language": "Language",
+  "account": "Account"
 }

@@ -186,4 +186,115 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get unknownError => 'Something unexpected happened. Please try again.';
+
+  @override
+  String get settingsAppLockTitle => 'App Lock & PIN';
+
+  @override
+  String get settingsAppLockSubtitleSet => 'PIN configured';
+
+  @override
+  String get settingsAppLockSubtitleNotSet => 'No PIN configured';
+
+  @override
+  String get settingsSetPin => 'Set PIN';
+
+  @override
+  String get settingsChangePin => 'Change PIN';
+
+  @override
+  String get settingsRemovePin => 'Remove PIN';
+
+  @override
+  String get pinDialogTitleSet => 'Set PIN';
+
+  @override
+  String get pinDialogTitleChange => 'Change PIN';
+
+  @override
+  String get pinDialogTitleRemove => 'Remove PIN';
+
+  @override
+  String get pinRecommendation =>
+      'We recommend a 6-digit PIN (4 to 8 digits allowed)';
+
+  @override
+  String get enterPin => 'Enter PIN';
+
+  @override
+  String get enterCurrentPin => 'Enter current PIN';
+
+  @override
+  String get enterNewPin => 'Enter new PIN';
+
+  @override
+  String get confirmNewPin => 'Confirm new PIN';
+
+  @override
+  String get pinMismatch => 'PINs do not match';
+
+  @override
+  String get pinLengthError => 'PIN must be between 4 and 8 digits';
+
+  @override
+  String get pinIncorrect => 'Incorrect PIN. Please try again.';
+
+  @override
+  String pinLockoutMessage(int seconds) {
+    return 'Too many failed attempts. Try again in ${seconds}s';
+  }
+
+  @override
+  String get biometricPrompt => 'Unlock vaultOFF';
+
+  @override
+  String get biometricsEnabled => 'Biometric unlock';
+
+  @override
+  String get biometricsSubtitle => 'Use fingerprint or face to unlock';
+
+  @override
+  String get unlock => 'Unlock';
+
+  @override
+  String get savePin => 'Save PIN';
+
+  @override
+  String get syncAndNetwork => 'Sync & Network';
+
+  @override
+  String get syncWifiOnly => 'Sync on Wi-Fi only';
+
+  @override
+  String get syncWifiOnlySubtitle =>
+      'Prevent using mobile data for automatic background sync';
+
+  @override
+  String get privacyAndSecurity => 'Privacy & Security';
+
+  @override
+  String get blockScreenshots => 'Block screenshots';
+
+  @override
+  String get blockScreenshotsSubtitle =>
+      'Prevent screen captures and hide content in app switcher';
+
+  @override
+  String get storage => 'Storage';
+
+  @override
+  String get freeUpSpace => 'Free up space';
+
+  @override
+  String get freeUpSpaceSubtitle =>
+      'Removes original downloads while keeping thumbnails offline';
+
+  @override
+  String get spaceCleared => 'Space cleared. Thumbnails retained.';
+
+  @override
+  String get language => 'Language';
+
+  @override
+  String get account => 'Account';
 }
