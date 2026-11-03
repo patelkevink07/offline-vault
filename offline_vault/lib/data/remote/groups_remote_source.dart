@@ -196,4 +196,35 @@ class GroupsRemoteSource {
       expiresInSeconds,
     );
   }
+
+  /// Soft-delete a file on the server (allowed for owner and editor by RLS).
+  Future<void> softDeleteFile(String fileId) async {
+    await _supabase
+        .from('files')
+        .update({
+          'deleted': true,
+          'updated_at': DateTime.now().toUtc().toIso8601String(),
+        })
+        .eq('id', fileId);
+  }
+
+  /// Soft-delete a folder and all its contents on the server.
+  Future<void> softDeleteFolder(String folderId) async {
+    final now = DateTime.now().toUtc().toIso8601String();
+    await _supabase
+        .from('folders')
+        .update({
+          'deleted': true,
+          'updated_at': now,
+        })
+        .eq('id', folderId);
+
+    await _supabase
+        .from('files')
+        .update({
+          'deleted': true,
+          'updated_at': now,
+        })
+        .eq('folder_id', folderId);
+  }
 }

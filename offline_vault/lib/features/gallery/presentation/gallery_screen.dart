@@ -9,6 +9,7 @@ import '../../../app/theme/app_spacing.dart';
 
 import '../../../core/storage/file_storage_service.dart';
 import '../../../data/local/database.dart';
+import '../../../data/repositories/files_repository.dart';
 import '../../../data/repositories/folders_repository.dart';
 import '../../../sync/sync_engine.dart';
 
@@ -137,10 +138,13 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
                           separatorBuilder: (_, __) => const SizedBox(width: AppSpacing.sm),
                           itemBuilder: (context, index) {
                             final folder = folders[index];
-                            return ActionChip(
-                              avatar: const Icon(Icons.folder_rounded, size: 18),
-                              label: Text(folder.name),
-                              onPressed: () => context.push('/group/${widget.groupId}/folder/${folder.id}'),
+                            return GestureDetector(
+                              onLongPress: () => _showFolderOptions(folder),
+                              child: ActionChip(
+                                avatar: const Icon(Icons.folder_rounded, size: 18),
+                                label: Text(folder.name),
+                                onPressed: () => context.push('/group/${widget.groupId}/folder/${folder.id}'),
+                              ),
                             );
                           },
                         ),
@@ -281,7 +285,12 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
     return bytes;
   }
 
-  void _showFileOptions(LocalFile file) {
+  Future<void> _showFileOptions(LocalFile file) async {
+    final db = ref.read(databaseProvider);
+    final group = await db.groupsDao.getById(widget.groupId);
+    final isViewer = (group?.myRole ?? 'viewer') == 'viewer';
+    if (!mounted) return;
+
     showModalBottomSheet(
       context: context,
       builder: (ctx) => SafeArea(
@@ -295,27 +304,103 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
                 context.push('/viewer/${file.id}?groupId=${widget.groupId}');
               },
             ),
+            if (isViewer)
+              ListTile(
+                leading: const Icon(Icons.phone_android_rounded),
+                title: const Text('Remove from this phone'),
+                subtitle: const Text('Keeps thumbnail offline, removes download'),
+                onTap: () async {
+                  Navigator.pop(ctx);
+                  await ref.read(filesRepositoryProvider).removeFromThisPhone(
+                    fileId: file.id,
+                    localOriginalPath: file.localOriginalPath,
+                  );
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Removed "${file.name}" from this phone')),
+                    );
+                  }
+                },
+              )
+            else
+              ListTile(
+                leading: const Icon(Icons.delete_outline_rounded, color: AppColors.lightError),
+                title: const Text('Delete File', style: TextStyle(color: AppColors.lightError)),
+                onTap: () async {
+                  Navigator.pop(ctx);
+                  await ref.read(filesRepositoryProvider).deleteFile(
+                    fileId: file.id,
+                    groupId: widget.groupId,
+                  );
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Deleted "${file.name}"')),
+                    );
+                  }
+                },
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _showFolderOptions(LocalFolder folder) async {
+    final db = ref.read(databaseProvider);
+    final group = await db.groupsDao.getById(widget.groupId);
+    final isViewer = (group?.myRole ?? 'viewer') == 'viewer';
+    if (isViewer || !mounted) return;
+
+    showModalBottomSheet(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Wrap(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.folder_open_rounded),
+              title: Text('Open ${folder.name}'),
+              onTap: () {
+                Navigator.pop(ctx);
+                context.push('/group/${widget.groupId}/folder/${folder.id}');
+              },
+            ),
             ListTile(
               leading: const Icon(Icons.delete_outline_rounded, color: AppColors.lightError),
-              title: const Text('Delete File', style: TextStyle(color: AppColors.lightError)),
+              title: const Text('Delete Folder', style: TextStyle(color: AppColors.lightError)),
+              subtitle: const Text('Deletes folder and all its contents for everyone'),
               onTap: () async {
                 Navigator.pop(ctx);
-                final db = ref.read(databaseProvider);
-                await db.filesDao.deleteById(file.id);
-                if (file.localOriginalPath != null) {
-                  try {
-                    File(file.localOriginalPath!).deleteSync();
-                  } catch (_) {}
-                }
-                if (file.localThumbPath != null) {
-                  try {
-                    File(file.localThumbPath!).deleteSync();
-                  } catch (_) {}
-                }
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Deleted "${file.name}"')),
+                final confirm = await showDialog<bool>(
+                  context: context,
+                  builder: (dCtx) => AlertDialog(
+                    title: Text('Delete "${folder.name}"?'),
+                    content: const Text(
+                      'Are you sure you want to delete this folder and all its contents for everyone in the vault?',
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(dCtx, false),
+                        child: const Text('Cancel'),
+                      ),
+                      FilledButton(
+                        style: FilledButton.styleFrom(backgroundColor: AppColors.lightError),
+                        onPressed: () => Navigator.pop(dCtx, true),
+                        child: const Text('Delete'),
+                      ),
+                    ],
+                  ),
+                );
+
+                if (confirm == true) {
+                  await ref.read(foldersRepositoryProvider).deleteFolder(
+                    folderId: folder.id,
+                    groupId: widget.groupId,
                   );
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Deleted folder "${folder.name}"')),
+                    );
+                  }
                 }
               },
             ),

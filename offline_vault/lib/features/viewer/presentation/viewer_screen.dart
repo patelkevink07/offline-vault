@@ -7,6 +7,7 @@ import 'package:pdfx/pdfx.dart';
 
 import '../../../core/storage/file_storage_service.dart';
 import '../../../data/local/database.dart';
+import '../../../data/repositories/files_repository.dart';
 import '../../../sync/sync_engine.dart';
 
 class FileViewerScreen extends ConsumerStatefulWidget {
@@ -129,6 +130,10 @@ class _FileViewerScreenState extends ConsumerState<FileViewerScreen> {
         ),
         actions: [
           IconButton(
+            icon: const Icon(Icons.delete_outline_rounded),
+            onPressed: _file != null ? _handleDeleteOrRemove : null,
+          ),
+          IconButton(
             icon: const Icon(Icons.info_outline_rounded),
             onPressed: _file != null ? _showInfoSheet : null,
           ),
@@ -193,5 +198,76 @@ class _FileViewerScreenState extends ConsumerState<FileViewerScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _handleDeleteOrRemove() async {
+    if (_file == null) return;
+    final db = ref.read(databaseProvider);
+    final group = await db.groupsDao.getById(widget.groupId);
+    final isViewer = (group?.myRole ?? 'viewer') == 'viewer';
+    if (!mounted) return;
+
+    if (isViewer) {
+      final confirm = await showDialog<bool>(
+        context: context,
+        builder: (dCtx) => AlertDialog(
+          title: const Text('Remove from this phone?'),
+          content: const Text(
+            'This removes the downloaded original file from your phone to save storage. The thumbnail will remain available offline, and you can re-download anytime.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dCtx, false),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(dCtx, true),
+              child: const Text('Remove'),
+            ),
+          ],
+        ),
+      );
+
+      if (confirm == true && mounted) {
+        await ref.read(filesRepositoryProvider).removeFromThisPhone(
+          fileId: _file!.id,
+          localOriginalPath: _file!.localOriginalPath,
+        );
+        if (mounted) {
+          Navigator.pop(context);
+        }
+      }
+    } else {
+      final confirm = await showDialog<bool>(
+        context: context,
+        builder: (dCtx) => AlertDialog(
+          title: Text('Delete "${_file!.name}"?'),
+          content: const Text(
+            'Are you sure you want to delete this file? It will be removed for everyone in this vault.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dCtx, false),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              style: FilledButton.styleFrom(backgroundColor: Colors.redAccent),
+              onPressed: () => Navigator.pop(dCtx, true),
+              child: const Text('Delete'),
+            ),
+          ],
+        ),
+      );
+
+      if (confirm == true && mounted) {
+        await ref.read(filesRepositoryProvider).deleteFile(
+          fileId: _file!.id,
+          groupId: widget.groupId,
+        );
+        if (mounted) {
+          Navigator.pop(context);
+        }
+      }
+    }
   }
 }

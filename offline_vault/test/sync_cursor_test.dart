@@ -337,8 +337,9 @@ void main() {
 
       await syncEngine.syncGroup('group-alpha');
 
-      // Local record must be deleted
-      expect(await db.filesDao.getById('file-to-delete'), isNull);
+      // Local record must be marked deleted (soft-delete tombstone)
+      final localFile = await db.filesDao.getById('file-to-delete');
+      expect(localFile?.isDeleted, isTrue);
 
       // Storage cleanup must be invoked for original and thumb
       expect(storageService.deletedPaths, contains('/fake/storage/group-alpha/originals/file-to-delete'));

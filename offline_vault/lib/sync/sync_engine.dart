@@ -102,6 +102,9 @@ class SyncEngine {
         return true;
       }
 
+      // Process persistent delete queue when online
+      await processDeleteQueue();
+
       // One-time migration: reset all existing cursors to null once so next sync does a safe re-pull
       final prefs = await SharedPreferences.getInstance();
       final cursorResetDone = prefs.getBool('sync_cursor_v2_reset_done') ?? false;
@@ -210,7 +213,7 @@ class SyncEngine {
           final isDeleted = folder['deleted'] as bool? ?? false;
           final folderId = folder['id'] as String;
           if (isDeleted) {
-            await _db.foldersDao.deleteById(folderId);
+            await _db.foldersDao.markDeleted(folderId);
           } else {
             await _db.foldersDao.upsert(
               LocalFoldersCompanion.insert(
@@ -230,28 +233,32 @@ class SyncEngine {
           final fileId = rf['id'] as String;
 
           if (isDeleted) {
-            await _db.filesDao.deleteById(fileId);
+            await _db.filesDao.markDeleted(fileId);
           } else {
             final existing = await _db.filesDao.getById(fileId);
-            await _db.filesDao.upsert(
-              LocalFilesCompanion.insert(
-                id: fileId,
-                groupId: groupId,
-                folderId: Value(rf['folder_id'] as String?),
-                name: rf['name'] as String,
-                note: Value(rf['note'] as String?),
-                mime: rf['mime_type'] as String,
-                size: (rf['size_bytes'] as num).toInt(),
-                checksum: rf['checksum'] as String,
-                width: Value(rf['width'] as int?),
-                height: Value(rf['height'] as int?),
-                thumbState: Value(existing?.thumbState ?? 'queued'),
-                originalState: Value(existing?.originalState ?? 'remote'),
-                localThumbPath: Value(existing?.localThumbPath),
-                localOriginalPath: Value(existing?.localOriginalPath),
-                updatedAt: DateTime.parse(rf['updated_at'] as String),
-              ),
-            );
+            // Deletion wins over edits in conflicts: if file is pending delete locally, retain pendingDelete
+            final isPendingDelete = existing?.pendingDelete ?? false;
+            if (!isPendingDelete) {
+              await _db.filesDao.upsert(
+                LocalFilesCompanion.insert(
+                  id: fileId,
+                  groupId: groupId,
+                  folderId: Value(rf['folder_id'] as String?),
+                  name: rf['name'] as String,
+                  note: Value(rf['note'] as String?),
+                  mime: rf['mime_type'] as String,
+                  size: (rf['size_bytes'] as num).toInt(),
+                  checksum: rf['checksum'] as String,
+                  width: Value(rf['width'] as int?),
+                  height: Value(rf['height'] as int?),
+                  thumbState: Value(existing?.thumbState ?? 'queued'),
+                  originalState: Value(existing?.originalState ?? 'remote'),
+                  localThumbPath: Value(existing?.localThumbPath),
+                  localOriginalPath: Value(existing?.localOriginalPath),
+                  updatedAt: DateTime.parse(rf['updated_at'] as String),
+                ),
+              );
+            }
           }
         }
       });
@@ -278,11 +285,13 @@ class SyncEngine {
         );
       }
 
-      // 7. Download missing thumbnails & originals for this group
+      // 7. Download missing thumbnails & originals for this group (excluding deleted/pending)
       final query = _db.select(_db.localFiles)
         ..where(
           (t) =>
               t.groupId.equals(groupId) &
+              t.pendingDelete.equals(false) &
+              t.isDeleted.equals(false) &
               (t.originalState.equals('remote') |
                   t.originalState.equals('queued') |
                   t.localOriginalPath.isNull()),
@@ -294,6 +303,77 @@ class SyncEngine {
       }
     } catch (e, st) {
       VaultLogger.e('Failed to sync group $groupId', e, st);
+    }
+  }
+
+  /// Process persistent delete queue: pushes soft-deletes to server when online.
+  Future<void> processDeleteQueue() async {
+    final pendingDeletes = await _db.deleteQueueDao.getPending();
+    if (pendingDeletes.isEmpty) return;
+
+    final isOnline = await _connectivity.isOnline;
+    final currentUser = _supabase.auth.currentUser;
+    if (!isOnline || currentUser == null) return;
+
+    for (final item in pendingDeletes) {
+      try {
+        if (item.targetType == 'folder') {
+          await _remote.softDeleteFolder(item.targetId);
+
+          // On server confirmation:
+          // Remove local original files & thumbs of all files in this folder
+          final filesInFolder = await (_db.select(_db.localFiles)
+                ..where((t) => t.folderId.equals(item.targetId)))
+              .get();
+          for (final f in filesInFolder) {
+            if (f.localOriginalPath != null) {
+              await _storage.deleteFile(f.localOriginalPath!);
+            }
+            if (f.localThumbPath != null) {
+              await _storage.deleteFile(f.localThumbPath!);
+            }
+            await _db.filesDao.markDeleted(f.id);
+          }
+          await _db.foldersDao.markDeleted(item.targetId);
+        } else {
+          await _remote.softDeleteFile(item.targetId);
+
+          // On server confirmation:
+          final file = await _db.filesDao.getById(item.targetId);
+          if (file != null) {
+            if (file.localOriginalPath != null) {
+              await _storage.deleteFile(file.localOriginalPath!);
+            }
+            if (file.localThumbPath != null) {
+              await _storage.deleteFile(file.localThumbPath!);
+            }
+            await _db.filesDao.markDeleted(item.targetId);
+          }
+        }
+        await _db.deleteQueueDao.remove(item.id);
+      } catch (e, st) {
+        VaultLogger.e('Failed to process delete queue for ${item.targetId}', e, st);
+        final errStr = e.toString().toLowerCase();
+        // If rejected by server (permission/RLS failure): restore locally
+        if (errStr.contains('permission') ||
+            errStr.contains('policy') ||
+            errStr.contains('403') ||
+            errStr.contains('denied') ||
+            errStr.contains('not authorized')) {
+          if (item.targetType == 'folder') {
+            await _db.foldersDao.restoreFolder(item.targetId);
+            final filesInFolder = await (_db.select(_db.localFiles)
+                  ..where((t) => t.folderId.equals(item.targetId)))
+                .get();
+            for (final f in filesInFolder) {
+              await _db.filesDao.restoreFile(f.id);
+            }
+          } else {
+            await _db.filesDao.restoreFile(item.targetId);
+          }
+          await _db.deleteQueueDao.remove(item.id);
+        }
+      }
     }
   }
 

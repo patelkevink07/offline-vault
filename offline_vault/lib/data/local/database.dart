@@ -32,6 +32,10 @@ class LocalFolders extends Table {
   TextColumn get parentId => text().nullable()();
   TextColumn get name => text().withLength(min: 1, max: 200)();
   DateTimeColumn get updatedAt => dateTime()();
+  BoolColumn get pendingDelete =>
+      boolean().withDefault(const Constant(false))();
+  BoolColumn get isDeleted =>
+      boolean().withDefault(const Constant(false))();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -56,6 +60,23 @@ class LocalFiles extends Table {
   TextColumn get localThumbPath => text().nullable()();
   TextColumn get localOriginalPath => text().nullable()();
   DateTimeColumn get updatedAt => dateTime()();
+  BoolColumn get pendingDelete =>
+      boolean().withDefault(const Constant(false))();
+  BoolColumn get isDeleted =>
+      boolean().withDefault(const Constant(false))();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+/// Persistent queue of items waiting to be soft-deleted on the server.
+class DeleteQueue extends Table {
+  TextColumn get id => text()();
+  TextColumn get targetId => text()();
+  TextColumn get groupId => text()();
+  TextColumn get targetType => text()(); // 'file' or 'folder'
+  DateTimeColumn get createdAt => dateTime()();
+  IntColumn get retryCount => integer().withDefault(const Constant(0))();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -172,13 +193,18 @@ class FoldersDao extends DatabaseAccessor<AppDatabase> with _$FoldersDaoMixin {
     return (delete(localFolders)..where((t) => t.id.equals(folderId))).go();
   }
 
-  /// Watch folders for a specific group, optionally filtered by parent.
+  /// Watch folders for a specific group, optionally filtered by parent, excluding pending and deleted.
   Stream<List<LocalFolder>> watchByGroup(
     String groupId, {
     String? parentId,
   }) {
     final query = select(localFolders)
-      ..where((t) => t.groupId.equals(groupId));
+      ..where(
+        (t) =>
+            t.groupId.equals(groupId) &
+            t.pendingDelete.equals(false) &
+            t.isDeleted.equals(false),
+      );
 
     if (parentId != null) {
       query.where((t) => t.parentId.equals(parentId));
@@ -187,6 +213,33 @@ class FoldersDao extends DatabaseAccessor<AppDatabase> with _$FoldersDaoMixin {
     }
 
     return (query..orderBy([(t) => OrderingTerm.asc(t.name)])).watch();
+  }
+
+  /// Mark folder as pending deletion locally (hiding it immediately).
+  Future<void> markPendingDelete(String folderId) {
+    return (update(localFolders)..where((t) => t.id.equals(folderId))).write(
+      const LocalFoldersCompanion(pendingDelete: Value(true)),
+    );
+  }
+
+  /// Mark folder as confirmed deleted (tombstone).
+  Future<void> markDeleted(String folderId) {
+    return (update(localFolders)..where((t) => t.id.equals(folderId))).write(
+      const LocalFoldersCompanion(
+        isDeleted: Value(true),
+        pendingDelete: Value(false),
+      ),
+    );
+  }
+
+  /// Restore folder locally if delete rejected by server.
+  Future<void> restoreFolder(String folderId) {
+    return (update(localFolders)..where((t) => t.id.equals(folderId))).write(
+      const LocalFoldersCompanion(
+        pendingDelete: Value(false),
+        isDeleted: Value(false),
+      ),
+    );
   }
 
   /// Get a single folder by ID.
@@ -216,7 +269,11 @@ class FoldersDao extends DatabaseAccessor<AppDatabase> with _$FoldersDaoMixin {
     final count = countAll();
     final query = selectOnly(localFolders)
       ..addColumns([count])
-      ..where(localFolders.groupId.equals(groupId));
+      ..where(
+        localFolders.groupId.equals(groupId) &
+            localFolders.pendingDelete.equals(false) &
+            localFolders.isDeleted.equals(false),
+      );
     final row = await query.getSingle();
     return row.read(count) ?? 0;
   }
@@ -231,13 +288,16 @@ class FilesDao extends DatabaseAccessor<AppDatabase> with _$FilesDaoMixin {
     return (delete(localFiles)..where((t) => t.id.equals(fileId))).go();
   }
 
-  /// Watch files for a group, optionally in a specific folder.
+  /// Watch files for a group, optionally in a specific folder, excluding pending and deleted.
   Stream<List<LocalFile>> watchByGroup(
     String groupId, {
     String? folderId,
   }) {
     final query = select(localFiles)
-      ..where((t) => t.groupId.equals(groupId));
+      ..where((t) =>
+          t.groupId.equals(groupId) &
+          t.pendingDelete.equals(false) &
+          t.isDeleted.equals(false),);
 
     if (folderId != null) {
       query.where((t) => t.folderId.equals(folderId));
@@ -246,6 +306,43 @@ class FilesDao extends DatabaseAccessor<AppDatabase> with _$FilesDaoMixin {
     }
 
     return (query..orderBy([(t) => OrderingTerm.desc(t.updatedAt)])).watch();
+  }
+
+  /// Mark file as pending deletion locally (hiding it immediately).
+  Future<void> markPendingDelete(String fileId) {
+    return (update(localFiles)..where((t) => t.id.equals(fileId))).write(
+      const LocalFilesCompanion(pendingDelete: Value(true)),
+    );
+  }
+
+  /// Mark file as confirmed deleted (tombstone).
+  Future<void> markDeleted(String fileId) {
+    return (update(localFiles)..where((t) => t.id.equals(fileId))).write(
+      const LocalFilesCompanion(
+        isDeleted: Value(true),
+        pendingDelete: Value(false),
+      ),
+    );
+  }
+
+  /// Restore file locally if delete was rejected by server.
+  Future<void> restoreFile(String fileId) {
+    return (update(localFiles)..where((t) => t.id.equals(fileId))).write(
+      const LocalFilesCompanion(
+        pendingDelete: Value(false),
+        isDeleted: Value(false),
+      ),
+    );
+  }
+
+  /// Viewer action: removes original file from device, keeps thumbnail offline.
+  Future<void> removeOriginalFromPhone(String fileId) {
+    return (update(localFiles)..where((t) => t.id.equals(fileId))).write(
+      const LocalFilesCompanion(
+        originalState: Value('remote'),
+        localOriginalPath: Value(null),
+      ),
+    );
   }
 
   /// Get a single file by ID.
@@ -309,7 +406,11 @@ class FilesDao extends DatabaseAccessor<AppDatabase> with _$FilesDaoMixin {
     final totalSize = localFiles.size.sum();
     final query = selectOnly(localFiles)
       ..addColumns([fileCount, totalSize])
-      ..where(localFiles.groupId.equals(groupId));
+      ..where(
+        localFiles.groupId.equals(groupId) &
+            localFiles.pendingDelete.equals(false) &
+            localFiles.isDeleted.equals(false),
+      );
     final row = await query.getSingle();
     return (
       count: row.read(fileCount) ?? 0,
@@ -317,7 +418,7 @@ class FilesDao extends DatabaseAccessor<AppDatabase> with _$FilesDaoMixin {
     );
   }
 
-  /// Full-text search across file names and notes using FTS5.
+  /// Full-text search across file names and notes using FTS5 (excluding pending/deleted).
   Future<List<LocalFile>> search(String query) async {
     final trimmed = query.trim();
     if (trimmed.isEmpty) return [];
@@ -327,7 +428,7 @@ class FilesDao extends DatabaseAccessor<AppDatabase> with _$FilesDaoMixin {
       final results = await customSelect(
         'SELECT f.* FROM local_files f '
         'INNER JOIN files_fts fts ON f.rowid = fts.rowid '
-        'WHERE files_fts MATCH ? '
+        'WHERE files_fts MATCH ? AND f.pending_delete = 0 AND f.is_deleted = 0 '
         'ORDER BY rank',
         variables: [Variable.withString(sanitized)],
         readsFrom: {localFiles},
@@ -351,6 +452,8 @@ class FilesDao extends DatabaseAccessor<AppDatabase> with _$FilesDaoMixin {
             localThumbPath: row.readNullable<String>('local_thumb_path'),
             localOriginalPath: row.readNullable<String>('local_original_path'),
             updatedAt: row.read<DateTime>('updated_at'),
+            pendingDelete: row.read<bool>('pending_delete'),
+            isDeleted: row.read<bool>('is_deleted'),
           );
         }).toList();
       }
@@ -362,8 +465,10 @@ class FilesDao extends DatabaseAccessor<AppDatabase> with _$FilesDaoMixin {
     return (select(localFiles)
           ..where(
             (t) =>
-                t.name.lower().like(pattern) |
-                t.note.lower().like(pattern),
+                (t.name.lower().like(pattern) |
+                    t.note.lower().like(pattern)) &
+                t.pendingDelete.equals(false) &
+                t.isDeleted.equals(false),
           ))
         .get();
   }
@@ -537,13 +642,54 @@ class SyncLogDao extends DatabaseAccessor<AppDatabase>
   }
 }
 
+@DriftAccessor(tables: [DeleteQueue])
+class DeleteQueueDao extends DatabaseAccessor<AppDatabase>
+    with _$DeleteQueueDaoMixin {
+  DeleteQueueDao(super.db);
+
+  /// Enqueue an item for soft-deletion on server.
+  Future<void> enqueue({
+    required String id,
+    required String targetId,
+    required String groupId,
+    required String targetType,
+  }) {
+    return into(deleteQueue).insertOnConflictUpdate(
+      DeleteQueueCompanion.insert(
+        id: id,
+        targetId: targetId,
+        groupId: groupId,
+        targetType: targetType,
+        createdAt: DateTime.now(),
+      ),
+    );
+  }
+
+  /// Get pending delete items.
+  Future<List<DeleteQueueData>> getPending() {
+    return (select(deleteQueue)
+          ..orderBy([(t) => OrderingTerm.asc(t.createdAt)]))
+        .get();
+  }
+
+  /// Remove item from queue.
+  Future<int> remove(String id) {
+    return (delete(deleteQueue)..where((t) => t.id.equals(id))).go();
+  }
+
+  /// Remove item by target ID.
+  Future<int> removeByTargetId(String targetId) {
+    return (delete(deleteQueue)..where((t) => t.targetId.equals(targetId))).go();
+  }
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Database
 // ═══════════════════════════════════════════════════════════════════════════
 
 @DriftDatabase(
-  tables: [LocalGroups, LocalFolders, LocalFiles, UploadQueue, SyncLog],
-  daos: [GroupsDao, FoldersDao, FilesDao, UploadQueueDao, SyncLogDao],
+  tables: [LocalGroups, LocalFolders, LocalFiles, UploadQueue, SyncLog, DeleteQueue],
+  daos: [GroupsDao, FoldersDao, FilesDao, UploadQueueDao, SyncLogDao, DeleteQueueDao],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
@@ -552,7 +698,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.e);
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration {
@@ -587,6 +733,13 @@ class AppDatabase extends _$AppDatabase {
         if (from < 2) {
           await m.addColumn(localGroups, localGroups.lastSyncCursorId);
           await customStatement('UPDATE local_groups SET last_sync_cursor = NULL, last_sync_cursor_id = NULL;');
+        }
+        if (from < 3) {
+          await m.addColumn(localFiles, localFiles.pendingDelete);
+          await m.addColumn(localFiles, localFiles.isDeleted);
+          await m.addColumn(localFolders, localFolders.pendingDelete);
+          await m.addColumn(localFolders, localFolders.isDeleted);
+          await m.createTable(deleteQueue);
         }
       },
       beforeOpen: (details) async {
