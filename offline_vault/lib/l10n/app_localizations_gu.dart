@@ -298,4 +298,21 @@ class AppLocalizationsGu extends AppLocalizations {
 
   @override
   String get account => 'ખાતું';
+
+  @override
+  String get batteryOptimization => 'બૅટરી ઑપ્ટિમાઇઝેશન';
+
+  @override
+  String get batteryOptimizationSubtitle =>
+      'ઍપ બંધ હોય ત્યારે પણ વૉલ્ટ અપડેટ રાખવા માટે પૃષ્ઠભૂમિ સિંકની મંજૂરી આપો';
+
+  @override
+  String get batteryOptimizationGuideTitle => 'બૅટરી ઑપ્ટિમાઇઝેશન અક્ષમ કરો';
+
+  @override
+  String get batteryOptimizationGuideContent =>
+      'જ્યારે ઍપ બંધ હોય ત્યારે Android vaultOFF ને સ્લીપ મોડમાં મૂકી શકે છે, જેનાથી સ્વચાલિત સિંક અટકી જાય છે. પૃષ્ઠભૂમિમાં તમારા વૉલ્ટ અને ફાઇલો અપડેટ રાખવા માટે, vaultOFF બૅટરી વપરાશને અનરિસ્ટ્રિક્ટેડ પર સેટ કરો.';
+
+  @override
+  String get openBatterySettings => 'બૅટરી સેટિંગ્સ ખોલો';
 }

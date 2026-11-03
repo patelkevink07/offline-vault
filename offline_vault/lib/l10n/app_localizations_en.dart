@@ -297,4 +297,21 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get account => 'Account';
+
+  @override
+  String get batteryOptimization => 'Battery Optimization';
+
+  @override
+  String get batteryOptimizationSubtitle =>
+      'Allow background sync to keep your vault updated even when closed';
+
+  @override
+  String get batteryOptimizationGuideTitle => 'Disable Battery Optimization';
+
+  @override
+  String get batteryOptimizationGuideContent =>
+      'Android may put vaultOFF to sleep when the app is closed, pausing automatic sync. To keep your vaults and files up to date in the background, set vaultOFF battery usage to Unrestricted.';
+
+  @override
+  String get openBatterySettings => 'Open Battery Settings';
 }

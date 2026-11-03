@@ -609,6 +609,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Account'**
   String get account;
+
+  /// No description provided for @batteryOptimization.
+  ///
+  /// In en, this message translates to:
+  /// **'Battery Optimization'**
+  String get batteryOptimization;
+
+  /// No description provided for @batteryOptimizationSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow background sync to keep your vault updated even when closed'**
+  String get batteryOptimizationSubtitle;
+
+  /// No description provided for @batteryOptimizationGuideTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Disable Battery Optimization'**
+  String get batteryOptimizationGuideTitle;
+
+  /// No description provided for @batteryOptimizationGuideContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Android may put vaultOFF to sleep when the app is closed, pausing automatic sync. To keep your vaults and files up to date in the background, set vaultOFF battery usage to Unrestricted.'**
+  String get batteryOptimizationGuideContent;
+
+  /// No description provided for @openBatterySettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Battery Settings'**
+  String get openBatterySettings;
 }
 
 class _AppLocalizationsDelegate

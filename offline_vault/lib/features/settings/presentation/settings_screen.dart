@@ -6,6 +6,7 @@ import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_spacing.dart';
 import '../../../core/security/pin_service.dart';
 import '../../../core/storage/secure_prefs.dart';
+import '../../../core/utils/battery_optimization_helper.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../auth/application/auth_controller.dart';
 
@@ -74,6 +75,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               setState(() => _wifiOnly = val);
               await prefs.setSyncOnWifiOnly(val);
             },
+          ),
+          ListTile(
+            leading: const Icon(Icons.battery_saver_rounded),
+            title: Text(l10n.batteryOptimization),
+            subtitle: Text(l10n.batteryOptimizationSubtitle),
+            trailing: const Icon(Icons.chevron_right_rounded),
+            onTap: () => BatteryOptimizationHelper.showGuideDialog(context),
           ),
           const Divider(),
 

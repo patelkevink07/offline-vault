@@ -126,5 +126,10 @@
   "freeUpSpaceSubtitle": "થંબનેલ્સ ઑફલાઇન રાખીને મૂળ ડાઉનલોડ્સ દૂર કરે છે",
   "spaceCleared": "જગ્યા ખાલી થઈ ગઈ. થંબનેલ્સ સચવાયેલા છે.",
   "language": "ભાષા",
-  "account": "ખાતું"
+  "account": "ખાતું",
+  "batteryOptimization": "બૅટરી ઑપ્ટિમાઇઝેશન",
+  "batteryOptimizationSubtitle": "ઍપ બંધ હોય ત્યારે પણ વૉલ્ટ અપડેટ રાખવા માટે પૃષ્ઠભૂમિ સિંકની મંજૂરી આપો",
+  "batteryOptimizationGuideTitle": "બૅટરી ઑપ્ટિમાઇઝેશન અક્ષમ કરો",
+  "batteryOptimizationGuideContent": "જ્યારે ઍપ બંધ હોય ત્યારે Android vaultOFF ને સ્લીપ મોડમાં મૂકી શકે છે, જેનાથી સ્વચાલિત સિંક અટકી જાય છે. પૃષ્ઠભૂમિમાં તમારા વૉલ્ટ અને ફાઇલો અપડેટ રાખવા માટે, vaultOFF બૅટરી વપરાશને અનરિસ્ટ્રિક્ટેડ પર સેટ કરો.",
+  "openBatterySettings": "બૅટરી સેટિંગ્સ ખોલો"
 }

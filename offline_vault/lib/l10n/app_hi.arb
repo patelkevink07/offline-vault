@@ -126,5 +126,10 @@
   "freeUpSpaceSubtitle": "थंबनेल को ऑफ़लाइन रखते हुए मूल डाउनलोड हटाता है",
   "spaceCleared": "स्थान खाली हो गया। थंबनेल सुरक्षित हैं।",
   "language": "भाषा",
-  "account": "खाता"
+  "account": "खाता",
+  "batteryOptimization": "बैटरी ऑप्टिमाइज़ेशन",
+  "batteryOptimizationSubtitle": "ऐप बंद होने पर भी वॉल्ट को अपडेट रखने के लिए बैकग्राउंड सिंक की अनुमति दें",
+  "batteryOptimizationGuideTitle": "बैटरी ऑप्टिमाइज़ेशन अक्षम करें",
+  "batteryOptimizationGuideContent": "ऐप बंद होने पर Android vaultOFF को स्लीप में डाल सकता है, जिससे स्वचालित सिंक रुक जाता है। बैकग्राउंड में अपने वॉल्ट और फ़ाइलों को अपडेट रखने के लिए, vaultOFF बैटरी उपयोग को अप्रतिबंधित पर सेट करें।",
+  "openBatterySettings": "बैटरी सेटिंग्स खोलें"
 }

@@ -126,5 +126,10 @@
   "freeUpSpaceSubtitle": "Removes original downloads while keeping thumbnails offline",
   "spaceCleared": "Space cleared. Thumbnails retained.",
   "language": "Language",
-  "account": "Account"
+  "account": "Account",
+  "batteryOptimization": "Battery Optimization",
+  "batteryOptimizationSubtitle": "Allow background sync to keep your vault updated even when closed",
+  "batteryOptimizationGuideTitle": "Disable Battery Optimization",
+  "batteryOptimizationGuideContent": "Android may put vaultOFF to sleep when the app is closed, pausing automatic sync. To keep your vaults and files up to date in the background, set vaultOFF battery usage to Unrestricted.",
+  "openBatterySettings": "Open Battery Settings"
 }
