@@ -23,6 +23,7 @@ final supabaseClientProvider = Provider<SupabaseClient>((ref) {
 
 class SupabaseService {
   static Future<void> initialize() async {
+    EnvConfig.validate();
     VaultLogger.i('Initializing Supabase client...');
     await Supabase.initialize(
       url: EnvConfig.supabaseUrl,

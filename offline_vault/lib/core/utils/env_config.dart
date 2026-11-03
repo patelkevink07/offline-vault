@@ -1,34 +1,38 @@
 import 'package:flutter/foundation.dart';
 
 /// Central environment configuration.
-/// Values are read from compile-time `--dart-define` with fallbacks.
+/// Values MUST be provided via compile-time `--dart-define`.
 class EnvConfig {
-  static const String supabaseUrl = String.fromEnvironment(
-    'SUPABASE_URL',
-    defaultValue: 'https://tdjpjkumjtuvsiabxmbl.supabase.co',
-  );
+  static const String supabaseUrl = String.fromEnvironment('SUPABASE_URL');
 
-  static const String supabaseAnonKey = String.fromEnvironment(
-    'SUPABASE_ANON_KEY',
-    defaultValue:
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRkanBqa3VtanR1dnNpYWJ4bWJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM2MTk0MDIsImV4cCI6MjEwOTE5NTQwMn0.18qRlXuj-u71BZWays0JwEoxycanXSFthlP_UaxSh4M',
-  );
+  static const String supabaseAnonKey = String.fromEnvironment('SUPABASE_ANON_KEY');
 
-  static const String googleWebClientId = String.fromEnvironment(
-    'GOOGLE_WEB_CLIENT_ID',
-    defaultValue:
-        '208697785706-748hcl816ah24bdb3inkkdf2s9lo56nr.apps.googleusercontent.com',
-  );
+  static const String googleWebClientId = String.fromEnvironment('GOOGLE_WEB_CLIENT_ID');
+
+  /// Validates environment configuration.
+  /// Throws a [StateError] at runtime if any required --dart-define is missing.
+  static void validate() {
+    final missing = <String>[];
+    if (supabaseUrl.isEmpty) missing.add('SUPABASE_URL');
+    if (supabaseAnonKey.isEmpty) missing.add('SUPABASE_ANON_KEY');
+    if (googleWebClientId.isEmpty) missing.add('GOOGLE_WEB_CLIENT_ID');
+
+    if (missing.isNotEmpty) {
+      throw StateError(
+        'Missing required build configuration. Please pass the following via --dart-define:\n'
+        '${missing.map((k) => '  --dart-define=$k=<value>').join('\n')}',
+      );
+    }
+  }
 
   static bool get isConfigured =>
-      supabaseUrl.isNotEmpty &&
-      supabaseAnonKey.isNotEmpty &&
-      !supabaseAnonKey.contains('development');
+      supabaseUrl.isNotEmpty && supabaseAnonKey.isNotEmpty;
 
   static void printConfigStatus() {
     if (kDebugMode) {
-      debugPrint('[EnvConfig] Supabase URL: $supabaseUrl');
+      debugPrint('[EnvConfig] Supabase URL configured: ${supabaseUrl.isNotEmpty}');
       debugPrint('[EnvConfig] Anon Key configured: ${supabaseAnonKey.isNotEmpty}');
+      debugPrint('[EnvConfig] Google Web Client ID configured: ${googleWebClientId.isNotEmpty}');
     }
   }
 }
